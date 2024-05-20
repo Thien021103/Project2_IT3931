@@ -2,6 +2,8 @@ from scapy.all import *
 from scapy.arch.windows import get_windows_if_list
 import sys
 
+# Need more work on compatibility with linux OS.
+
 def get_mac(ip):
     """
     Returns the MAC address for the specified IP address using ARP request
