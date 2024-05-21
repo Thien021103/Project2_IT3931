@@ -39,6 +39,7 @@ def ip_to_mac(ip, interface):
         opcode = b'\x00\x01'  # ARP request opcode
 
         target_ip = socket.inet_aton(ip)  # Target IP address in binary format
+        print("aa11")
 
         # Construct the ARP request packet
         arp_request_packet = dst_mac + src_mac + ethertype + \
@@ -52,6 +53,7 @@ def ip_to_mac(ip, interface):
 
         # Receive the response
         response = s.recv(2048)
+        print(response)
 
         # Extract the MAC address from the response
         mac_address = response[6:12].hex(':')
@@ -63,4 +65,6 @@ def ip_to_mac(ip, interface):
         return None
 
 if __name__ == "__main__":
-    ip_to_mac("172.17.216.224", "eth0")
+    ip_to_mac("192.168.56.1", "enp0s8")
+    print("aa")
+
