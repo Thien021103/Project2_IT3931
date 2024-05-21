@@ -25,6 +25,7 @@ def send_arp_reply(interface, source_ip, source_mac, target_ip, target_mac):
     # Send the packet
     s.send(packet)
 
+
 if __name__ == "__main__":
     # Specify the network interface
     interface = "enp0s8"
