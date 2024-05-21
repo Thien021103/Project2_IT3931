@@ -1,4 +1,5 @@
 import psutil
+import os
 import socket
 import tkinter as tk
 from tkinter import messagebox
@@ -24,7 +25,7 @@ def get_local_network_ips(interface_name):
 
 def ip_to_mac(ip):
     """ Get MAC address for a given IP using ARP request. """
-    pid = socket.getpid()
+    pid = os.getpid()
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(0x0806))
     s.bind(('eth0', socket.htons(0x0806)))
     arp_frame = [
