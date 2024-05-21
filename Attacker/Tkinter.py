@@ -9,20 +9,16 @@ from concurrent.futures import ThreadPoolExecutor
 
 def get_interfaces():
     """ Get network interfaces and their addresses. """
-    interfaces = psutil.net_if_addrs()
-    return interfaces
+    return psutil.net_if_addrs()
 
 def get_local_network_ips(interface_name):
     """ Get the IP address and subnet mask for a given interface. """
-    addresses = psutil.net_if_addrs()[interface_name]
-    ip_address = None
-    netmask = None
-    for address in addresses:
-        if address.family == socket.AF_INET:
-            ip_address = address.address
-            netmask = address.netmask
-            break
-    return ip_address, netmask
+    addresses = psutil.net_if_addrs().get(interface_name)
+    if addresses:
+        for address in addresses:
+            if address.family == socket.AF_INET:
+                return address.address, address.netmask
+    return None, None
 
 def ip_to_mac(ip, interface):
     """ Get MAC address for a given IP using ARP request. """
@@ -42,7 +38,6 @@ def ip_to_mac(ip, interface):
 
 def scan_network(ip_address, netmask, interface_name):
     """ Scan the network for active devices using ARP requests. """
-    # Calculate the network address and CIDR
     network = ipaddress.IPv4Network(f"{ip_address}/{netmask}", strict=False)
     network_range = [str(ip) for ip in network.hosts()]
 
@@ -66,12 +61,12 @@ def on_button_click(interface_name):
     else:
         messagebox.showerror("Error", "Unable to get IP address or netmask for the selected interface.")
 
-# Get network interfaces and their addresses
-interfaces = get_interfaces()
-
 # Create the main Tkinter window
 root = tk.Tk()
 root.title("Network Interfaces")
+
+# Get network interfaces and their addresses
+interfaces = get_interfaces()
 
 # Create and place buttons for each network interface
 for interface_name in interfaces:
@@ -83,3 +78,4 @@ for interface_name in interfaces:
 
 # Run the Tkinter event loop
 root.mainloop()
+
