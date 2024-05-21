@@ -1,6 +1,7 @@
 import psutil
-import os
 import socket
+import struct
+import fcntl
 import tkinter as tk
 from tkinter import messagebox
 import ipaddress
@@ -23,33 +24,23 @@ def get_local_network_ips(interface_name):
             break
     return ip_address, netmask
 
-def ip_to_mac(ip):
+def ip_to_mac(ip, interface):
     """ Get MAC address for a given IP using ARP request. """
-    pid = os.getpid()
-    s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(0x0806))
-    s.bind(('eth0', socket.htons(0x0806)))
-    arp_frame = [
-        b'\xff\xff\xff\xff\xff\xff',  # Destination MAC
-        socket.inet_aton(ip)  # Source IP
-    ]
-    s.send(b''.join(arp_frame))
-    s.close()
-
-    s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(0x0806))
-    s.settimeout(2)
     try:
-        while True:
-            frame, addr = s.recvfrom(2048)
-            if frame[12:14] == b'\x08\x06':  # ARP
-                if frame[28:32] == socket.inet_aton(ip):
-                    return ':'.join(['%02x' % b for b in frame[6:12]])
-    except socket.timeout:
-        pass
-    finally:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(2)
+        s.connect((ip, 0))
+        hwaddr = fcntl.ioctl(
+            s.fileno(),
+            0x8927,  # SIOCGARP
+            struct.pack('256s', interface[:15].encode('utf-8'))
+        )
         s.close()
-    return None
+        return ':'.join('%02x' % b for b in hwaddr[18:24])
+    except Exception as e:
+        return None
 
-def scan_network(ip_address, netmask):
+def scan_network(ip_address, netmask, interface_name):
     """ Scan the network for active devices using ARP requests. """
     # Calculate the network address and CIDR
     network = ipaddress.IPv4Network(f"{ip_address}/{netmask}", strict=False)
@@ -57,7 +48,7 @@ def scan_network(ip_address, netmask):
 
     devices = []
     with ThreadPoolExecutor(max_workers=100) as executor:
-        futures = {executor.submit(ip_to_mac, ip): ip for ip in network_range}
+        futures = {executor.submit(ip_to_mac, ip, interface_name): ip for ip in network_range}
         for future in futures:
             mac = future.result()
             if mac:
@@ -69,7 +60,7 @@ def on_button_click(interface_name):
     """ Handle button click to display selected interface info. """
     ip_address, netmask = get_local_network_ips(interface_name)
     if ip_address and netmask:
-        devices = scan_network(ip_address, netmask)
+        devices = scan_network(ip_address, netmask, interface_name)
         device_info = "\n".join([f"IP: {device['ip']}, MAC: {device['mac']}" for device in devices])
         messagebox.showinfo("Network Scan Result", f"Devices on {interface_name}:\n{device_info}")
     else:
