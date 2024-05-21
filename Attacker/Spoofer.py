@@ -1,6 +1,8 @@
 import socket
 import struct
 
+#Testing purpose
+
 def send_arp_reply(interface, source_ip, source_mac, target_ip, target_mac):
     # Create a raw socket
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
