@@ -54,8 +54,13 @@ def ip_to_mac(ip, interface):
         response = s.recv(2048)
 
         # Extract the MAC address from the response
-        mac_address = response[6:12].hex(':')
-        print(mac_address)
+        # Assuming response contains the ARP reply packet received from s.recv()
+        arp_op = response[20:22]  # ARP operation code
+        if arp_op == b'\x00\x02':  # Check if ARP reply
+            mac_address = response[22:28].hex(':')  # Extract the MAC address from the ARP reply
+            print(mac_address)
+        else:
+            print("Received packet is not an ARP reply.")
 
         return mac_address
     except Exception as e:
