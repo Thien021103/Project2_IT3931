@@ -93,8 +93,11 @@ def scan_network(ip_address, netmask, interface_name):
     devices = []
     with ThreadPoolExecutor(max_workers=100) as executor:
         futures = {executor.submit(ip_to_mac, ip, interface_name): ip for ip in network_range}
+ 
+        print("here ")
         for future in futures:
             mac = future.result()
+            print(mac)
             if mac:
                 devices.append({'ip': futures[future], 'mac': mac})
 
