@@ -100,6 +100,7 @@ def scan_network(ip_address, netmask, interface_name):
             print(mac)
             if mac:
                 devices.append({'ip': futures[future], 'mac': mac})
+            print(devices[0])
 
     return devices
 
