@@ -1,8 +1,8 @@
 
 import socket
 import psutil
-import socket
-
+import struct
+import fcntl
 
 # Testing file for UI, solo function, etc..
 
@@ -36,7 +36,7 @@ def ip_to_mac(ip, interface):
 
         # Prepare the ARP request packet
         src_mac = get_mac_address(interface)  # Source MAC address
-        src_ip = socket.inet_aton("192.168.1.100")  # Replace with your source IP address
+        src_ip = socket.inet_aton("192.168.1.102")  # Replace with your source IP address
         dst_mac = b'\xff\xff\xff\xff\xff\xff'  # Broadcast MAC address
         target_ip = socket.inet_aton(ip)  # Target IP address in binary format
 
