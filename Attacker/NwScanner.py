@@ -1,3 +1,4 @@
+import threading
 import psutil
 import socket
 import struct
@@ -5,7 +6,7 @@ import fcntl
 import tkinter as tk
 from tkinter import messagebox
 import ipaddress
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError, wait
 
 def get_interfaces():
     """ Get network interfaces and their addresses. """
@@ -34,6 +35,28 @@ def get_mac_address(interface):
     info = fcntl.ioctl(s.fileno(), 0x8927, struct.pack('256s', bytes(interface[:15], 'utf-8')))
     return info[18:24]
 
+def scan_network(ip_address, netmask, interface_name):
+    """Scan the network for active devices using ARP requests."""
+    # Calculate the network address and CIDR
+    network = ipaddress.IPv4Network(f"{ip_address}/{netmask}", strict=False)
+    network_range = [str(ip) for ip in network.hosts()]# Example with small number
+
+    devices = []
+
+    for ip in network_range:
+        try:
+            mac = ip_to_mac(ip, interface_name)
+            if mac:
+                devices.append({'ip': ip, 'mac': mac})
+                print(devices)
+        except Exception as e:
+            print(f"Error retrieving result for IP {ip}: {e}")
+        
+        # Add a short delay between requests to avoid flooding the network
+
+    print(devices)
+    return devices
+
 def ip_to_mac(ip, interface):
     """Get MAC address for a given IP using ARP request."""
     try:
@@ -42,6 +65,7 @@ def ip_to_mac(ip, interface):
         
         # Bind the socket to the specified interface
         s.bind((interface, 0))
+        s.settimeout(0.01)
 
         # Prepare the ARP request packet
         src_mac = get_mac_address(interface)  # Source MAC address
@@ -66,7 +90,10 @@ def ip_to_mac(ip, interface):
         # Send the ARP request packet
         s.send(arp_request_packet)
 
-        while True:
+        attempts = 0
+        while attempts < 5:
+            attempts+=1
+
             # Receive the response
             response = s.recv(2048)
 
@@ -77,60 +104,59 @@ def ip_to_mac(ip, interface):
                 # Check if it's the correct IP address
                 if response[28:32] == target_ip:  
                     mac_address = ':'.join('%02x' % b for b in response[22:28])
+                    print(mac_address)
                     return mac_address
+            
 
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-
-def scan_network(ip_address, netmask, interface_name):
-    """ Scan the network for active devices using ARP requests. """
-
-    # Calculate the network address and CIDR
-    network = ipaddress.IPv4Network(f"{ip_address}/{netmask}", strict=False)
-    network_range = [str(ip) for ip in network.hosts()]
-
-    devices = []
-    with ThreadPoolExecutor(max_workers=100) as executor:
-        futures = {executor.submit(ip_to_mac, ip, interface_name): ip for ip in network_range}
- 
-        print("here ")
-        for future in futures:
-            mac = future.result()
-            print(mac)
-            if mac:
-                devices.append({'ip': futures[future], 'mac': mac})
-            print(devices[0])
-
-    return devices
+        return False
 
 def on_button_click(interface_name):
-    """ Handle button click to display selected interface info. """
+    """Handle button click to display selected interface info in another thread."""
+    def scan_and_display():
+        ip_address, netmask = get_local_network_ips(interface_name)
+        if ip_address and netmask:
+            print("here 2:" + interface_name)
+            devices = scan_network(ip_address, netmask, interface_name)
+            print(devices)
 
-    ip_address, netmask = get_local_network_ips(interface_name)
+            print("here 3")
+            print(devices[0]['ip'])
+            device_info = "\n".join([f"IP: {device['ip']}, MAC: {device['mac']}" for device in devices])
+            print(device_info)
+            messagebox.showinfo("Network Scan Result", f"Devices on {interface_name}:\n{device_info}")
+        else:
+            messagebox.showerror("Error", "Unable to get IP address or netmask for the selected interface.")
 
-    if ip_address and netmask:
-        devices = scan_network(ip_address, netmask, interface_name)
-        device_info = "\n".join([f"IP: {device['ip']}, MAC: {device['mac']}" for device in devices])
-        messagebox.showinfo("Network Scan Result", f"Devices on {interface_name}:\n{device_info}")
-        
-    else:
-        messagebox.showerror("Error", "Unable to get IP address or netmask for the selected interface.")
-
-# Get network interfaces and their addresses
-interfaces = get_interfaces()
+    # Run the network scan in a separate thread to keep the GUI responsive
+    threading.Thread(target=scan_and_display).start()
 
 # Create the main Tkinter window
-root = tk.Tk()
-root.title("Network Interfaces")
+def create_main_frame():
+    """Create the main application frame."""
+    root = tk.Tk()
+    root.title("Network Scanner")
 
-# Create and place buttons for each network interface
-for interface_name in interfaces:
-    addresses = interfaces[interface_name]
-    address_str = ', '.join([f"{address.address}" for address in addresses if address.address])
-    button_text = f"{interface_name} - {address_str}"
-    button = tk.Button(root, text=button_text, command=lambda name=interface_name: on_button_click(name))
-    button.pack(pady=5)
+    # Properly handle the closing of the main frame
+    root.protocol("WM_DELETE_WINDOW", root.destroy)
+    
+    # Get network interfaces and their addresses
+    interfaces = get_interfaces()
 
-# Run the Tkinter event loop
-root.mainloop()
+    # Create and place buttons for each network interface
+    for interface_name in interfaces:
+        addresses = interfaces[interface_name]
+        address_str = ', '.join([f"{address.address}" for address in addresses if address.address])
+        button_text = f"{interface_name} - {address_str}"
+        button = tk.Button(root, text=button_text, command=lambda name=interface_name: on_button_click(name))
+        button.pack(pady=5)
+
+
+    return root
+
+
+if __name__ == "__main__":
+    root = create_main_frame()
+
+    # Run the Tkinter event loop
+    root.mainloop()
