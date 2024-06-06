@@ -40,3 +40,12 @@
 2024-06-06 14:02:20,322 - [*] No ARP spoofing detected in the last 10 seconds.
 2024-06-06 14:02:30,325 - [*] No ARP spoofing detected in the last 10 seconds.
 2024-06-06 14:02:40,328 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 17:55:45,495 - ARP Spoof Detection Program Started
+2024-06-06 17:57:20,998 - ARP Spoof Detection Program Started
+2024-06-06 17:57:23,884 - Selected interface: Wi-Fi
+2024-06-06 17:57:23,884 - Network range: 192.168.102.0/24
+2024-06-06 17:57:23,884 - Starting ARP Spoofing Detection...
+2024-06-06 17:57:33,885 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 17:57:42,966 - Selected interface: Wi-Fi
+2024-06-06 17:57:42,966 - Network range: 192.168.102.0/24
+2024-06-06 17:57:42,967 - Starting ARP Spoofing Detection...

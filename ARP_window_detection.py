@@ -32,6 +32,10 @@ class ARPMonitorGUI:
         self.interface_menu = tk.OptionMenu(root, self.interface_var, *self.get_interfaces())
         self.interface_menu.pack()
 
+        # Refresh button for network interfaces
+        self.refresh_button = tk.Button(root, text="Refresh Interfaces", command=self.refresh_interfaces)
+        self.refresh_button.pack()
+
         # Start button
         self.start_button = tk.Button(root, text="Start Monitoring", command=self.start_monitoring)
         self.start_button.pack()
@@ -58,6 +62,14 @@ class ARPMonitorGUI:
             from scapy.arch import get_if_list
             return get_if_list()
 
+    def refresh_interfaces(self):
+        interfaces = self.get_interfaces()
+        menu = self.interface_menu["menu"]
+        menu.delete(0, "end")
+        for interface in interfaces:
+            menu.add_command(label=interface, command=tk._setit(self.interface_var, interface))
+        logging.info("Network interfaces updated.")
+
     def start_monitoring(self):
         selected_interface = self.interface_var.get()
         if selected_interface:
@@ -66,6 +78,7 @@ class ARPMonitorGUI:
             global monitoring
             monitoring = True
             threading.Thread(target=monitor_and_protect, args=(selected_interface,)).start()
+            logging.info(f"Started monitoring on interface: {selected_interface}")
         else:
             messagebox.showerror("Error", "Invalid interface description. Make sure to select exactly from the dropdown.")
 
@@ -74,6 +87,7 @@ class ARPMonitorGUI:
         monitoring = False
         self.start_button.config(state='normal')
         self.stop_button.config(state='disabled')
+        logging.info("Stopped monitoring.")
 
 class TextHandler(logging.Handler):
     def __init__(self, text):
