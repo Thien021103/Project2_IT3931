@@ -1,0 +1,42 @@
+2024-06-05 19:16:10,969 - ARP Spoof Detection Program Started
+2024-06-05 19:16:13,819 - Selected interface: Wi-Fi
+2024-06-05 19:16:13,819 - Starting ARP Spoofing Detection...
+2024-06-05 19:16:23,822 - No ARP spoofing detected in the last 10 seconds.
+2024-06-05 19:16:33,823 - No ARP spoofing detected in the last 10 seconds.
+2024-06-05 19:26:40,614 - ARP Spoof Detection Program Started
+2024-06-05 19:26:45,530 - Selected interface: Wi-Fi
+2024-06-05 19:26:45,530 - Starting ARP Spoofing Detection...
+2024-06-05 19:26:55,536 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-05 19:27:19,926 - ARP Spoof Detection Program Started
+2024-06-05 19:27:23,826 - Selected interface: Wi-Fi
+2024-06-05 19:27:23,826 - Starting ARP Spoofing Detection...
+2024-06-05 19:27:33,848 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-05 19:29:52,906 - ARP Spoof Detection Program Started
+2024-06-05 19:29:54,845 - Selected interface: Ethernet 2
+2024-06-05 19:29:54,845 - Starting ARP Spoofing Detection...
+2024-06-05 19:30:04,857 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-05 19:30:06,821 - Selected interface: Ethernet 2
+2024-06-05 19:30:06,821 - Starting ARP Spoofing Detection...
+2024-06-05 19:30:09,910 - Selected interface: Wi-Fi
+2024-06-05 19:30:09,910 - Starting ARP Spoofing Detection...
+2024-06-05 19:30:19,921 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-05 21:53:16,217 - ARP Spoof Detection Program Started
+2024-06-05 21:53:18,894 - Selected interface: Ethernet 2
+2024-06-05 21:53:18,894 - Starting ARP Spoofing Detection...
+2024-06-05 21:56:52,306 - ARP Spoof Detection Program Started
+2024-06-06 11:29:46,851 - ARP Spoof Detection Program Started
+2024-06-06 11:29:52,121 - Selected interface: Wi-Fi
+2024-06-06 11:29:52,121 - Starting ARP Spoofing Detection...
+2024-06-06 11:30:02,127 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:01:07,078 - ARP Spoof Detection Program Started
+2024-06-06 14:01:10,304 - Selected interface: Wi-Fi
+2024-06-06 14:01:10,304 - Starting ARP Spoofing Detection...
+2024-06-06 14:01:20,306 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:01:30,310 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:01:40,312 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:01:50,313 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:02:00,316 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:02:10,319 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:02:20,322 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:02:30,325 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 14:02:40,328 - [*] No ARP spoofing detected in the last 10 seconds.

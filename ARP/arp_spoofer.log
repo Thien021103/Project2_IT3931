@@ -1,0 +1,131 @@
+2024-05-24 14:53:41,511 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:53:42,502 - INFO - Started ARP spoofing
+2024-05-24 14:53:43,738 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:53:45,868 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:53:48,024 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:53:52,419 - ERROR - Unable to get MAC address for IP: 10.14.15.43
+2024-05-24 14:53:52,539 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:54:09,435 - ERROR - Unable to get MAC address for IP: 10.14.15.43
+2024-05-24 14:54:09,527 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:54:11,674 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:54:20,091 - ERROR - Unable to get MAC address for IP: 10.14.15.43
+2024-05-24 14:54:20,253 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:54:22,428 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 14:54:37,538 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:57841 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:54:38,556 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:57841 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:54:39,479 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:57841 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:54:40,501 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:57841 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:55:20,139 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:61644 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:55:21,161 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:61644 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:55:22,181 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:61644 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:55:23,205 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:61644 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:56:31,817 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:64888 > 239.255.255.250:ws_discovery / Raw
+2024-05-24 14:56:31,916 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:64888 > 239.255.255.250:ws_discovery / Raw
+2024-05-24 14:56:32,122 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:32,225 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:64888 > 239.255.255.250:ws_discovery / Raw
+2024-05-24 14:56:32,428 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:32,528 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:32,633 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:32,836 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:32,940 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android.local.'" 
+2024-05-24 14:56:33,045 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:64888 > 239.255.255.250:ws_discovery / Raw
+2024-05-24 14:56:33,348 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:33,355 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 14:56:33,965 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android.local.'" 
+2024-05-24 14:56:34,510 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:64888 > 239.255.255.250:ws_discovery / Raw
+2024-05-24 14:56:35,229 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "fe80::e358:4596:bbee:a12d" 
+2024-05-24 14:56:35,708 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "fe80::e358:4596:bbee:a12d" 
+2024-05-24 14:56:36,019 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android.local.'" 
+2024-05-24 14:56:36,523 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:64888 > 239.255.255.250:ws_discovery / Raw
+2024-05-24 14:56:37,549 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:54530 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:56:38,469 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:54530 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:56:38,478 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:64888 > 239.255.255.250:ws_discovery / Raw
+2024-05-24 14:56:39,494 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:54530 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:56:40,322 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android.local.'" 
+2024-05-24 14:56:40,518 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:54530 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:56:44,509 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "fe80::e358:4596:bbee:a12d" 
+2024-05-24 14:56:44,820 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:45,124 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:45,433 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:45,639 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "fe80::e358:4596:bbee:a12d" 
+2024-05-24 14:56:46,662 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:46,985 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:47,174 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:47,488 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "fe80::e358:4596:bbee:a12d" 
+2024-05-24 14:56:48,301 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:48,403 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android.local.'" 
+2024-05-24 14:56:48,609 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android.local.'" 
+2024-05-24 14:56:49,528 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-2.local.'" 
+2024-05-24 14:56:49,734 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-2.local.'" 
+2024-05-24 14:56:50,044 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-2.local.'" 
+2024-05-24 14:56:50,246 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-2.local.'" 
+2024-05-24 14:56:50,347 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-2.local.'" 
+2024-05-24 14:56:50,452 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-2.local.'" 
+2024-05-24 14:56:50,964 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 14:56:51,376 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-2.local.'" 
+2024-05-24 14:56:51,986 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 14:56:53,118 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-2.local.'" 
+2024-05-24 14:56:53,421 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 14:56:53,526 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 14:56:53,727 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 14:56:54,037 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-3.local.'" 
+2024-05-24 14:56:55,057 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-3.local.'" 
+2024-05-24 14:56:57,005 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-3.local.'" 
+2024-05-24 14:57:01,104 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-3.local.'" 
+2024-05-24 14:57:09,090 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-3.local.'" 
+2024-05-24 14:57:11,953 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 14:57:20,151 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:63071 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:57:21,171 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:63071 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:57:22,195 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:63071 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:57:23,220 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:63071 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:57:25,164 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-3.local.'" 
+2024-05-24 14:57:57,115 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-3.local.'" 
+2024-05-24 14:58:37,567 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:50943 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:58:38,490 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:50943 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:58:39,617 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:50943 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:58:40,539 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:50943 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:59:01,221 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "b'Android-3.local.'" 
+2024-05-24 14:59:15,864 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 14:59:20,165 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:53611 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:59:21,192 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:53611 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:59:22,221 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:53611 > 239.255.255.250:ssdp / Raw
+2024-05-24 14:59:23,243 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:53611 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:00:37,579 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:58539 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:00:38,603 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:58539 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:00:39,218 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:00:39,526 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:58539 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:00:40,556 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:58539 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:00:40,755 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 15:00:41,072 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 15:00:41,370 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 15:00:41,678 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:00:42,499 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:00:42,803 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 15:00:43,109 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 15:00:43,315 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 15:00:43,929 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:00:45,567 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:00:47,820 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:00:52,017 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:01:00,110 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:01:17,181 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:01:20,180 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:60223 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:01:21,211 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:60223 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:01:22,228 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:60223 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:01:23,263 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:60223 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:01:43,220 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 15:01:43,426 - INFO - Captured packet: Ether / IP / UDP / DNS Qry "b'Android-3.local.'" 
+2024-05-24 15:01:43,731 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:01:44,656 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:01:46,703 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:01:51,002 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:01:59,097 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:02:15,068 - INFO - Captured packet: Ether / IP / UDP / DNS Ans "10.14.15.43" 
+2024-05-24 15:02:37,597 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:57722 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:02:38,618 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:57722 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:02:39,542 - INFO - Captured packet: Ether / IP / UDP 10.14.15.84:57722 > 239.255.255.250:ssdp / Raw
+2024-05-24 15:02:40,506 - ERROR - Unable to get MAC address for IP: 10.14.15.43
+2024-05-24 15:02:41,571 - ERROR - Error in packet sniffing: main thread is not in main loop
+2024-05-24 15:02:42,632 - WARNING - Mac address to reach destination not found. Using broadcast.
+2024-05-24 15:02:42,646 - INFO - Sent spoofed packets to 10.14.15.43 and 10.14.15.84
+2024-05-24 15:02:46,661 - ERROR - Error in ARP spoofing: main thread is not in main loop
