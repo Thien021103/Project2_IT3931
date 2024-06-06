@@ -1,7 +1,6 @@
 import socket
 import tkinter as tk
 from tkinter import messagebox
-from scapy.all import ARP, Ether, srp
 
 def get_lan_interfaces():
     interfaces = []
@@ -12,7 +11,7 @@ def get_lan_interfaces():
 
 def scan_lan(interface):
     try:
-        ans, _ = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst="192.168.1.0/24"), timeout=2, iface=interface, verbose=False)
+        ans, _ = scapy.srp(Ether(dst="ff:ff:ff:ff:ff:ff")/scapy.ARP(pdst="192.168.1.0/24"), timeout=2, iface=interface, verbose=False)
         devices = []
         for _, rcv in ans:
             devices.append((rcv.psrc, rcv.hwsrc))

