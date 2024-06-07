@@ -36,7 +36,7 @@ def start_server(interface, port):
         print(f"Connection with {client_address} closed")
 
 # Specify the interface and port
-interface = '127.0.0.1'  # localhost
+interface = '192.168.56.1'  # localhost
 port = 65432
 
 start_server(interface, port)
