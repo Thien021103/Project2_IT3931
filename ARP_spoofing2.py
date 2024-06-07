@@ -122,7 +122,7 @@ class NetworkScanGUI:
         self.insert_to_treeview(f"Scanning network: {ip_range}...")
 
         # Use Scapy for scanning
-        devices = self.scan_with_scapy(ip_range)
+        devices = self.scan_with_scapy(ip_range=ip_range, interface=selected_network)
         unique_devices = {device['ip']: device for device in devices if device['ip'] and device['mac']}
         self.devices = list(unique_devices.values())  # Store scanned devices
 
@@ -166,13 +166,13 @@ class NetworkScanGUI:
         return f"{ip}/{cidr}"
 
     @handle_exceptions
-    def scan_with_scapy(self, ip_range):
+    def scan_with_scapy(self, ip_range, interface):
         
         results = []
-        arp = ARP(pdst='192.168.56.0/24')
+        arp = ARP(pdst=ip_range)
         ether = Ether(dst="ff:ff:ff:ff:ff:ff")
         packet = ether / arp
-        result = srp(packet, timeout=SCAN_TIMEOUT, retry=SCAN_RETRIES, verbose=False)[0]
+        result = srp(packet, timeout=SCAN_TIMEOUT, retry=SCAN_RETRIES, iface=interface, verbose=False)[0]
         for sent, received in result:
             results.append({'ip': received.psrc, 'mac': received.hwsrc})
         return results
