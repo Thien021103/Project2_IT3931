@@ -40,3 +40,10 @@
 2024-06-06 14:02:20,322 - [*] No ARP spoofing detected in the last 10 seconds.
 2024-06-06 14:02:30,325 - [*] No ARP spoofing detected in the last 10 seconds.
 2024-06-06 14:02:40,328 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 15:28:49,308 - ARP Spoof Detection Program Started
+2024-06-06 15:29:18,265 - Selected interface: Ethernet 3
+2024-06-06 15:29:18,266 - Starting ARP Spoofing Detection...
+2024-06-06 15:29:28,267 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 15:29:38,268 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 15:29:48,271 - [*] No ARP spoofing detected in the last 10 seconds.
+2024-06-06 15:29:58,274 - [*] No ARP spoofing detected in the last 10 seconds.
