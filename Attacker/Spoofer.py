@@ -42,7 +42,7 @@ if __name__ == "__main__":
     target_mac1 = b'\x0a\x00\x27\x00\x00\x13'  
     
     target_ip2 = "192.168.56.101"
-    target_mac2 = b'\x08\x00\x27\x25\xf9\x4d'  
+    target_mac2 = b'\x08\x00\x27\x25\xf9\x4d' 
 
     # Send the ARP reply packet
     while True:
