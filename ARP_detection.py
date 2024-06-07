@@ -6,6 +6,8 @@ from tkinter import messagebox
 from tkinter.scrolledtext import ScrolledText
 from collections import defaultdict
 from scapy.all import *
+import os
+import platform
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -196,6 +198,17 @@ def handle_arp_reply(packet):
         logging.error(f"Error handling ARP reply: {e}")
 
 if __name__ == "__main__":
+    # Ensure the script is running with appropriate privileges
+    if platform.system() == "Linux":
+        if os.geteuid() != 0:
+            print("Please run this script with root privileges.")
+            exit()
+    elif platform.system() == "Windows":
+        import ctypes
+        if not ctypes.windll.shell32.IsUserAnAdmin():
+            print("Please run this script with administrator privileges.")
+            exit()
+
     root = tk.Tk()
     app = ARPMonitorGUI(root)
     root.mainloop()
