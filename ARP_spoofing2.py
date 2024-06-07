@@ -184,6 +184,19 @@ class NetworkScanGUI:
         else:
             self.devices_treeview.insert("", tk.END, text="Info", values=(ip, ""))
 
+    @handle_exceptions
+    def get_mac(self, ip):
+        interface = self.interfaces.get()
+        arp_request = ARP(pdst=ip)
+        broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
+        arp_request_broadcast = broadcast / arp_request
+        answered_list = srp(arp_request_broadcast, timeout=1, iface=interface, verbose=False)[0]
+        if answered_list:
+            return answered_list[0][1].hwsrc
+        else:
+            self.log_message(f"No response for IP {ip}")
+        return None
+
     def safe_start_arp_spoofing(self):
         self.safe_method(self.start_arp_spoofing)
 
@@ -289,18 +302,6 @@ class NetworkScanGUI:
             elif ip_layer.src == gateway_ip and ip_layer.dst == target_ip:
                 # Forward packet from gateway to target
                 send(packet, verbose=False)
-
-    @handle_exceptions
-    def get_mac(self, ip):
-        arp_request = ARP(pdst=ip)
-        broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
-        arp_request_broadcast = broadcast / arp_request
-        answered_list = srp(arp_request_broadcast, timeout=1, verbose=False)[0]
-        if answered_list:
-            return answered_list[0][1].hwsrc
-        else:
-            self.log_message(f"No response for IP {ip}")
-        return None
 
     @handle_exceptions
     def restore_network(self, target_ip, gateway_ip, target_mac, gateway_mac):
