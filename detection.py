@@ -161,6 +161,18 @@ class NetworkScanGUI:
             self.log_text.yview(tk.END)
         self.master.after(100, self.update_log)
 
+    def get_mac(self, ip):
+        interface = self.interfaces.get()
+        arp_request = ARP(pdst=ip)
+        broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
+        arp_request_broadcast = broadcast / arp_request
+        answered_list = srp(arp_request_broadcast, timeout=1, iface=interface, verbose=False)[0]
+        if answered_list:
+            return answered_list[0][1].hwsrc
+        else:
+            self.log_message(f"No response for IP {ip}")
+        return None
+    
     def safe_method(self, method):
         try:
             method()
@@ -207,18 +219,6 @@ class NetworkScanGUI:
             else:
                 self.log_message(f"No ARP spoofing detected on interface {interface}.")
         self.log_message(f"ARP spoofing detection stopped on interface {interface}.")
-
-    def get_mac(self, ip):
-        interface = self.interfaces.get()
-        arp_request = ARP(pdst=ip)
-        broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
-        arp_request_broadcast = broadcast / arp_request
-        answered_list = srp(arp_request_broadcast, timeout=1, iface=interface, verbose=False)[0]
-        if answered_list:
-            return answered_list[0][1].hwsrc
-        else:
-            self.log_message(f"No response for IP {ip}")
-        return None
 
 def main():
     try:
