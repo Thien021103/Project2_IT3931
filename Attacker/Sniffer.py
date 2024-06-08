@@ -14,11 +14,12 @@ def process_tcp_packet(pkt):
             try:
                 # Decode the payload as UTF-8
                 decoded_payload = tcp_payload.decode('utf-8', errors='replace')
+                print(f'{pkt[IP].src} :  {decoded_payload}')
                 # Determine the direction of the packet and print the payload
-                if pkt[IP].src == ip_source and pkt[IP].dst == ip_destination:
-                    print(f"From {ip_source} to {ip_destination}: {decoded_payload}")
-                elif pkt[IP].src == ip_destination and pkt[IP].dst == ip_source:
-                    print(f"From {ip_destination} to {ip_source}: {decoded_payload}")
+                # if pkt[IP].src == ip_source and pkt[IP].dst == ip_destination:
+                #     print(f"From {ip_source} to {ip_destination}: {decoded_payload}")
+                # elif pkt[IP].src == ip_destination and pkt[IP].dst == ip_source:
+                #     print(f"From {ip_destination} to {ip_source}: {decoded_payload}")
             except UnicodeDecodeError as e:
                 print(f"Failed to decode TCP payload: {e}")
 
