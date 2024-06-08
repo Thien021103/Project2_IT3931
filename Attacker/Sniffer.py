@@ -1,11 +1,9 @@
-from scapy.all import sniff, IP, TCP
+from scapy.all import sniff, TCP, IP
 
 # Define the network interface and parameters
-interface = "eth0"  # Replace with your network interface name
-packet_count = 10   # Number of packets to capture
-timeout = 10        # Timeout in seconds
-ip_source = "192.168.1.1"  # Replace with the source IP address
-ip_destination = "192.168.1.2"  # Replace with the destination IP address
+interface = "enp0s8"  # Replace with your network interface name
+ip_source = "192.168.56.101"  # Replace with the source IP address
+ip_destination = "192.168.56.1"  # Replace with the destination IP address
 
 # Function to process and display TCP packet payloads
 def process_tcp_packet(pkt):
@@ -22,9 +20,7 @@ def process_tcp_packet(pkt):
 
 # Capture TCP packets with specific source and destination IP addresses
 filter_str = f"tcp and src host {ip_source} and dst host {ip_destination}"
-print(f"Capturing {packet_count} TCP packets from {ip_source} to {ip_destination} on interface {interface} or until timeout of {timeout} seconds...")
-tcp_packets = sniff(filter=filter_str, iface=interface, count=packet_count, timeout=timeout)
+print(f"Starting continuous capture of TCP packets from {ip_source} to {ip_destination} on interface {interface}...")
 
-# Process and display each captured TCP packet's payload
-for pkt in tcp_packets:
-    process_tcp_packet(pkt)
+# Continuous sniffing
+sniff(filter=filter_str, iface=interface, prn=process_tcp_packet, store=0)
