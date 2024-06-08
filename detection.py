@@ -203,19 +203,24 @@ class NetworkScanGUI:
     def detect_arp_spoofing(self, interface):
         self.log_message(f"Detecting ARP spoofing on interface {interface}.")
         while not self.scan_stop_event.is_set():
-            arp_packets = sniff(iface=interface, filter="arp", count=100, timeout=10)
+            arp_packets = sniff(filter="arp", iface=interface, count=10, timeout=5)
+            print(arp_packets)
             unique_ips = set()
             for packet in arp_packets:
-                if packet[ARP].op == 2:  # Response
-                    unique_ips.add(packet[ARP].psrc)
-            if len(unique_ips) > 1:
+                if ARP in packet:
+                    if packet[ARP].op == 2:  # Reply ARP
+                        print(packet[ARP].psrc)
+                        unique_ips.add(packet[ARP].psrc)
+            
+            # Spamming ip address
+            if len(unique_ips) == 1:
                 self.log_message(f"Possible ARP spoofing detected on interface {interface}!", important=True)
                 for ip in unique_ips:
                     mac = self.get_mac(ip)
                     if mac:
-                        self.log_message(f"IP: {ip}, MAC: {mac}", important=True)
+                        self.log_message(f"IP: {ip}, MAC: {mac}, might be incorrect", important=True)
                     else:
-                        self.log_message(f"IP: {ip}, MAC: Unknown", important=True)
+                        self.log_message(f"IP: {ip}, MAC: Unknown, might be incorrect", important=True)
             else:
                 self.log_message(f"No ARP spoofing detected on interface {interface}.")
         self.log_message(f"ARP spoofing detection stopped on interface {interface}.")
