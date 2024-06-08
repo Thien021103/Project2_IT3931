@@ -24,4 +24,4 @@ filter_str = f"tcp and ((src host {ip_source} and dst host {ip_destination}) or 
 print(f"Starting continuous capture of TCP packets between {ip_source} and {ip_destination} on interface {interface}...")
 
 # Continuous sniffing
-sniff(filter=filter_str, iface=interface, prn=process_tcp_packet, store=0)
+sniff(filter=filter_str, iface=interface, count=1, prn=process_tcp_packet, store=0)

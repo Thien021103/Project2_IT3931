@@ -1,11 +1,10 @@
 import os
 import socket
 import psutil
-from scapy.all import ARP, Ether, srp, send, conf, sniff, Raw, IP, sendp
+from scapy.all import ARP, Ether, srp, send, conf, sniff, IP, sendp, TCP
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import threading
-import platform
 import sys
 import traceback
 import queue
@@ -282,10 +281,11 @@ class NetworkScanGUI:
 
     @handle_exceptions
     def sniff_packets(self, target_ip, gateway_ip):
-        filter_str = f"host {target_ip} or host {gateway_ip}"
+        interface = self.interfaces.get()
+        filter_str = f"tcp and ((src host {target_ip} and dst host {gateway_ip}) or (src host {gateway_ip} and dst host {target_ip}))"
         try:
             while not self.sniff_thread_stop_event.is_set():
-                packets = sniff(filter=filter_str, timeout=10)
+                packets = sniff(filter=filter_str, count=1, timeout=10, iface=interface)
                 for packet in packets:
                     self.log_packet(packet)
                     self.forward_packet(packet, target_ip, gateway_ip)
@@ -294,12 +294,17 @@ class NetworkScanGUI:
 
     @handle_exceptions
     def log_packet(self, packet):
-        if packet.haslayer(Raw):
-            payload = packet[Raw].load
-            decoded_payload = self.decode_payload(payload)
-            self.log_message(f"Packet: {packet.summary()} Payload: {decoded_payload}")
-        else:
-            self.log_message(f"Packet: {packet.summary()}")
+        if packet.haslayer(TCP) and packet.haslayer(IP):
+            # Extract the TCP payload
+            tcp_payload = bytes(packet[TCP].payload)
+            if tcp_payload:
+                try:
+                    # Decode the payload as UTF-8
+                    decoded_payload = self.decode_payload(tcp_payload)
+                    if len(decoded_payload) != 0:
+                        self.log_message(f'{packet[IP].src} :  {decoded_payload}')
+                except UnicodeDecodeError as e:
+                    self.log_message(f"Failed to decode TCP payload: {e}")
 
     def decode_payload(self, payload):
         try:
