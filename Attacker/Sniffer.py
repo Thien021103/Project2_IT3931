@@ -1,48 +1,27 @@
-import socket
-import struct
+from scapy.all import sniff, TCP, IP
 
-def sniff_tcp_packets(interface):
-    # Create a raw socket and bind it to the specified network interface
-    s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))  # 0x0003 is ETH_P_ALL
-    
-    s.bind(("enp0s8", 0))
+# Define the network interface and parameters
+interface = "enp0s8"  # Replace with your network interface name
+ip_source = "192.168.56.101"  # Replace with the source IP address
+ip_destination = "192.168.56.1"  # Replace with the destination IP address
 
-    while True:
-        # Receive packets
-        packet = s.recvfrom(65565)
-        
-        # Extract the packet data
-        packet_data = packet[0]
-        
-        # Extract the Ethernet header
-        eth_length = 14
-        eth_header = packet_data[:eth_length]
-        eth_header = struct.unpack("!6s6sH", eth_header)
-        
-        # IP header starts after the Ethernet header
-        ip_header = packet_data[eth_length:]
-        
-        # Extract the protocol
-        protocol = ip_header[9]
-        
-        # Check if it's a TCP packet (protocol number 6)
-        if protocol == 6:
-        
-            # Extract the TCP payload
-            tcp_header = ip_header[20:]
-            tcp_payload = tcp_header[32:]
-            
-            # Check if it has payload
-            if tcp_payload and len(tcp_payload) > 0:
-                try:
-                    # Decode the TCP payload as UTF-8
-                    decoded_payload = tcp_payload.decode('utf-8')
-                    print(decoded_payload)
-                except UnicodeDecodeError:
-                    continue
-                    
-if __name__ == "__main__":
-    # Specify the interface you want to sniff on
-    interface = "192.168.56.102"  # Change this to your desired interface
-    sniff_tcp_packets(interface)
+# Function to process and display TCP packet payloads
+def process_tcp_packet(pkt):
+    if pkt.haslayer(TCP) and pkt.haslayer(IP):
+        # Extract the TCP payload
+        tcp_payload = bytes(pkt[TCP].payload)
+        if tcp_payload:
+            try:
+                # Decode the payload as UTF-8
+                decoded_payload = tcp_payload.decode('utf-8', errors='replace')
+                if len(decoded_payload) != 0:
+                    print(f'{pkt[IP].src} :  {decoded_payload}')
+            except UnicodeDecodeError as e:
+                print(f"Failed to decode TCP payload: {e}")
 
+# Capture TCP packets with specific source and destination IP addresses
+filter_str = f"tcp and ((src host {ip_source} and dst host {ip_destination}) or (src host {ip_destination} and dst host {ip_source}))"
+print(f"Starting continuous capture of TCP packets between {ip_source} and {ip_destination} on interface {interface}...")
+
+# Continuous sniffing
+sniff(filter=filter_str, iface=interface, count=1, prn=process_tcp_packet, store=0)
