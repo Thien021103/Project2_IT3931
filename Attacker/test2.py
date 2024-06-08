@@ -22,9 +22,5 @@ def send_arp_request(target_ip):
         print("No response received.")
 
 # Example usage
-<<<<<<< HEAD
-target_ip = "192.168.56.101"  # Specify the target IP address
-=======
 target_ip = "192.168.56.102"  # Specify the target IP address
->>>>>>> 2c22c15da0ca21af0acafc2b231a37cd1176221c
 send_arp_request(target_ip)
