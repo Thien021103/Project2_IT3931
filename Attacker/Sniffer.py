@@ -24,7 +24,7 @@ def process_tcp_packet(pkt):
                 print(f"Failed to decode TCP payload: {e}")
 
 # Capture TCP packets with specific source and destination IP addresses
-filter_str = f"tcp and (src host {ip_source} and dst host {ip_destination} or src host {ip_destination} and dst host {ip_source})"
+filter_str = f"tcp and ((src host {ip_source} and dst host {ip_destination}) or (src host {ip_destination} and dst host {ip_source}))"
 print(f"Starting continuous capture of TCP packets between {ip_source} and {ip_destination} on interface {interface}...")
 
 # Continuous sniffing
