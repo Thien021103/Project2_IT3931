@@ -28,7 +28,7 @@ def start_server(interface, port):
             print(f"Received from client: {data.decode()}")
             
             # Send a response back to the client
-            response = input("Enter response to client: ")
+            response = input("Enter response to client: ") + "\n"
             client_socket.send(response.encode())
         
         # Close the client socket
