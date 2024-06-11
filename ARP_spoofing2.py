@@ -19,7 +19,7 @@ def handle_exceptions(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            args[0].log_message(f"Error: {e}\n{traceback.format_exc()}")
+            args[0].log_message(f"Error: {e}\n{traceback.format_exc()}", 'red')
     return wrapper
 
 class NetworkScanGUI:
@@ -104,7 +104,7 @@ class NetworkScanGUI:
     @handle_exceptions
     def scan_network(self):
         if self.scan_thread and self.scan_thread.is_alive():
-            self.log_message("Network scan is already in progress.")
+            self.log_message("Network scan is already in progress.", 'blue')
             return
         selected_network = self.interfaces.get()
         self.scan_thread = threading.Thread(target=self.do_scan_network, args=(selected_network,))
@@ -225,7 +225,7 @@ class NetworkScanGUI:
     @handle_exceptions
     def stop_arp_spoofing(self):
         if not self.spoofing:
-            self.log_message("ARP spoofing is not currently active.")
+            self.log_message("ARP spoofing is not currently active.", 'blue')
             return
         self.log_message("Attempting to stop ARP spoofing...", 'blue')
         self.spoof_thread_stop_event.set()
@@ -305,7 +305,8 @@ class NetworkScanGUI:
                         decoded_payload = self.decode_payload(tcp_payload)
                         if decoded_payload:
                             print(f'{packet[IP].src} : {decoded_payload}')
-                            self.log_message(f'{packet[IP].src} :  {decoded_payload}', 'green')
+                            self.log_message(f'{packet[IP].src} :', 'blue')  
+                            self.log_message(f'{decoded_payload} \n', 'green')
                     except UnicodeDecodeError as e:
                         print(f"Failed to decode TCP payload: {e}")
                         self.log_message(f"Failed to decode TCP payload: {e}", 'red')
