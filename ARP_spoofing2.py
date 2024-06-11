@@ -286,7 +286,7 @@ class NetworkScanGUI:
         filter_str = f"tcp and ((src host {target_ip} and dst host {gateway_ip}) or (src host {gateway_ip} and dst host {target_ip}))"
         try:
             while not self.sniff_thread_stop_event.is_set():
-                packets = sniff(filter=filter_str, count=5, timeout=10, iface=interface)
+                packets = sniff(filter=filter_str, count=10, timeout=10, iface=interface)
                 for packet in packets:
                     self.log_packet(packet)
                     self.forward_packet(packet, target_ip, gateway_ip)
