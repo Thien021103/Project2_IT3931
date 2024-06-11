@@ -83,7 +83,7 @@ class NetworkScanGUI:
     def create_log_frame(self):
         self.frame_log = ttk.Frame(self.master)
         self.frame_log.grid(row=3, column=0, padx=10, pady=5, sticky=tk.W+tk.E)
-        self.log_text = scrolledtext.ScrolledText(self.frame_log, wrap=tk.WORD, width=100, height=20, state='disabled')
+        self.log_text = scrolledtext.ScrolledText(self.frame_log, wrap=tk.WORD, width=140, height=18, state='disabled')
         self.log_text.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W+tk.E)
 
     @handle_exceptions
