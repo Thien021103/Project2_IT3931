@@ -32,15 +32,15 @@ def log_packet(packet):
 def sniff_packets(interface, target_ip, gateway_ip):
     filter_str = f"tcp and ((src host {target_ip} and dst host {gateway_ip}) or (src host {gateway_ip} and dst host {target_ip}))"
     try:
-        sniff(filter=filter_str, prn=log_packet, iface=interface, count=0, timeout=10)
+        sniff(filter=filter_str, prn=log_packet, iface=interface, count=20, timeout=15)
     except Exception as e:
         print(f"Error in sniffing packets: {e}")
 
 if __name__ == "__main__":
     # Change these to your desired interface and IPs
     interface = "enp0s8"
-    target_ip = "192.168.1.1"
-    gateway_ip = "192.168.1.254"
+    target_ip = "192.168.56.1"
+    gateway_ip = "192.168.56.101"
 
     try:
         sniff_packets(interface, target_ip, gateway_ip)
