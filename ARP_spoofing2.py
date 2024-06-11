@@ -343,6 +343,12 @@ class NetworkScanGUI:
 
     # Update the log
     def update_log(self):
+        # Configure the tag to display red text
+        self.log_text.tag_configure('red', foreground='red')
+        self.log_text.tag_configure('green', foreground='green')
+        self.log_text.tag_configure('blue', foreground='blue')
+        self.log_text.tag_configure('black', foreground='black')
+        
         while not self.log_queue.empty():
             message, color = self.log_queue.get_nowait()
             self.log_text.configure(state='normal')
@@ -350,12 +356,6 @@ class NetworkScanGUI:
             self.log_text.insert(tk.END, message + '\n', color)
             self.log_text.configure(state='disabled')
             self.log_text.yview(tk.END)
-        
-        # Configure the tag to display red text
-        self.log_text.tag_configure('red', foreground='red')
-        self.log_text.tag_configure('green', foreground='green')
-        self.log_text.tag_configure('blue', foreground='blue')
-        self.log_text.tag_configure('black', foreground='black')
 
         # Recurring Call
         self.master.after(100, self.update_log)

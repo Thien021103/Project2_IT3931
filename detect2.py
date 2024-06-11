@@ -98,7 +98,7 @@ class NetworkScanGUI:
 
     def scan_network(self):
         if self.scan_thread and self.scan_thread.is_alive():
-            self.log_message("Network scan is already in progress.")
+            self.log_message(message="Network scan is already in progress.", color='blue')
             return
         selected_network = self.interfaces.get()
         self.scan_thread = threading.Thread(target=self.do_scan_network, args=(selected_network,))
@@ -107,10 +107,10 @@ class NetworkScanGUI:
     def do_scan_network(self, selected_network):
         ip_range = self.get_ip_range(selected_network)
         if not ip_range:
-            self.log_message("Unable to get IP range for the selected network interface.")
+            self.log_message(message="Unable to get IP range for the selected network interface.", color='red')
             return
 
-        self.log_message(f"Scanning network: {ip_range}...")
+        self.log_message(message=f"Scanning network: {ip_range}...", color='blue')
 
         # Use Scapy for scanning
         devices = self.scan_with_scapy(ip_range=ip_range, interface=selected_network)
@@ -169,21 +169,32 @@ class NetworkScanGUI:
         else:
             self.devices_treeview.insert("", tk.END, text="Info", values=(ip, ""))
 
-    def log_message(self, message, important=False):
+    def log_message(self, message, important=False, color='black'):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if important:
             formatted_message = f"[{timestamp}] *** {message} ***"
+            self.log_queue.put((formatted_message, color))
         else:
             formatted_message = f"[{timestamp}] {message}"
-        self.log_queue.put(formatted_message)
+            self.log_queue.put((formatted_message, color))
+        
 
     def update_log(self):
+        # Configure the tag to display red text
+        self.log_text.tag_configure('red', foreground='red')
+        self.log_text.tag_configure('green', foreground='green')
+        self.log_text.tag_configure('blue', foreground='blue')
+        self.log_text.tag_configure('black', foreground='black')       
+        
         while not self.log_queue.empty():
-            message = self.log_queue.get_nowait()
+            message, color = self.log_queue.get_nowait()
             self.log_text.configure(state='normal')
-            self.log_text.insert(tk.END, message + '\n')
+            # Insert the message with a color tag
+            self.log_text.insert(tk.END, message + '\n', color)
             self.log_text.configure(state='disabled')
             self.log_text.yview(tk.END)
+
+        # Recurring Call
         self.master.after(100, self.update_log)
 
     def get_mac(self, ip):
@@ -195,14 +206,14 @@ class NetworkScanGUI:
         if answered_list:
             return answered_list[0][1].hwsrc
         else:
-            self.log_message(f"No response for IP {ip}")
+            self.log_message(message=f"No response for IP {ip}", color='red')
         return None
     
     def safe_method(self, method):
         try:
             method()
         except Exception as e:
-            self.log_message(f"Error: {e}\n{traceback.format_exc()}", important=True)
+            self.log_message(message=f"Error: {e}\n{traceback.format_exc()}", important=True, color='red')
 
     def safe_start_detection(self):
         self.safe_method(self.start_detection)
@@ -216,29 +227,29 @@ class NetworkScanGUI:
         self.monitoring_stop_event.clear()  # Clear the stop event for monitoring
         self.monitoring_thread = threading.Thread(target=self.monitor_and_detect, args=(selected_interface,))
         self.monitoring_thread.start()
-        self.log_message(f"ARP spoofing detection started on interface {selected_interface}.", important=True)
+        self.log_message(message=f"ARP spoofing detection started on interface {selected_interface}.", important=True, color='blue')
 
     def stop_detection(self):
         if self.monitoring_thread and self.monitoring_thread.is_alive():
             self.monitoring_stop_event.set()  # Signal the monitoring thread to stop
             self.monitoring_thread.join(timeout=5)  # Join with timeout to avoid indefinite blocking
             if self.monitoring_thread.is_alive():
-                self.log_message("Failed to stop ARP spoofing detection thread within the timeout period.", important=True)
+                self.log_message(message="Failed to stop ARP spoofing detection thread within the timeout period.", important=True, color='red')
             else:
-                self.log_message("ARP spoofing detection stopped.", important=True)
+                self.log_message(message="ARP spoofing detection stopped.", important=True, color='blue')
         else:
-            self.log_message("No ARP spoofing detection is running.", important=True)
+            self.log_message(message="No ARP spoofing detection is running.", important=True, color='blue')
 
     def monitor_and_detect(self, interface):
         global monitoring
         monitoring = True
-        self.log_message(f"Monitoring for ARP poisoning on interface: {interface}...", important=True)
+        self.log_message(message=f"Monitoring for ARP poisoning on interface: {interface}...", important=True, color='blue')
         try:
             sniff(iface=interface, filter="arp", prn=self.process_packet, store=0, stop_filter=self.should_stop_sniffing)
         except Exception as e:
-            self.log_message(f"Error on interface {interface}: {e}", important=True)
+            self.log_message(message=f"Error on interface {interface}: {e}", important=True, color='red')
         monitoring = False
-        self.log_message(f"ARP spoofing detection stopped on interface {interface}.", important=True)
+        self.log_message(message=f"ARP spoofing detection stopped on interface {interface}.", important=True, color='green')
 
     def should_stop_sniffing(self, packet):
         return self.monitoring_stop_event.is_set()
@@ -254,19 +265,19 @@ class NetworkScanGUI:
 
             # Validate MAC addresses
             if response_mac == "00:00:00:00:00:00":
-                self.log_message(f"Invalid MAC address received from IP: {packet[ARP].psrc}")
+                self.log_message(message=f"Invalid MAC address received from IP: {packet[ARP].psrc}", color='red')
                 return
 
             if real_mac is None:
-                self.log_message(f"Unable to determine real MAC address for IP: {packet[ARP].psrc}")
+                self.log_message(message=f"Unable to determine real MAC address for IP: {packet[ARP].psrc}", color='red')
                 return
 
             if real_mac != response_mac:
-                self.log_message(f"!!! ARP Poisoning Detected !!! IP: {packet[ARP].psrc} has changed from {real_mac} to {response_mac}", important=True)
+                self.log_message(message=f"!!! ARP Poisoning Detected !!! IP: {packet[ARP].psrc} has changed from {real_mac} to {response_mac}", important=True, color='red')
             else:
-                self.log_message(f"No poisoning detected for IP: {packet[ARP].psrc}")
+                self.log_message(message=f"No poisoning detected for IP: {packet[ARP].psrc}", color='green')
         except Exception as e:
-            self.log_message(f"Error handling ARP reply: {e}\n{traceback.format_exc()}", important=True)
+            self.log_message(message=f"Error handling ARP reply: {e}\n{traceback.format_exc()}", important=True, color='red')
 
 def main():
     try:
