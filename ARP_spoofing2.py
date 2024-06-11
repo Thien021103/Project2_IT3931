@@ -1,7 +1,7 @@
 import os
 import socket
 import psutil
-from scapy.all import ARP, Ether, srp, send, conf, sniff, IP, sendp, TCP, Raw
+from scapy.all import ARP, Ether, srp, send, conf, sniff, IP, sendp, TCP
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import threading
@@ -296,28 +296,16 @@ class NetworkScanGUI:
     @handle_exceptions
     def log_packet(self, packet):
         if packet.haslayer(TCP) and packet.haslayer(IP):
-            # Check if the packet contains TCP and Raw layers
-            if Raw in packet:
-                # Extract the TCP payload (Raw layer)
-                tcp_payload = bytes(packet[Raw].load)
-                print(tcp_payload)
-                # Decode the payload as UTF-8
+            # Extract the TCP payload
+            tcp_payload = bytes(packet[TCP].payload)
+            if tcp_payload:
                 try:
-                    decoded_payload = tcp_payload.decode('utf-8')
-                except UnicodeDecodeError:
-                    try:
-                        return tcp_payload.decode('latin-1')
-                    except UnicodeDecodeError:
-                        return repr(tcp_payload)
-
-                
-                # Check if the payload seems to be an HTTP request
-                if decoded_payload.startswith('GET'):
-                    # Log the HTTP request
-                    self.log_message(f'{packet[IP].src} :  {decoded_payload}', 'blue')
-                else:
-                    # Log the payload as-is
-                    self.log_message(f'{packet[IP].src} : Non-HTTP payload', 'red')
+                    # Decode the payload as UTF-8
+                    decoded_payload = self.decode_payload(tcp_payload)
+                    if len(decoded_payload) != 0:
+                        self.log_message(f'{packet[IP].src} :  {decoded_payload}', 'blue')
+                except UnicodeDecodeError as e:
+                    self.log_message(f"Failed to decode TCP payload: {e}", 'red')
 
     def decode_payload(self, payload):
         try:
