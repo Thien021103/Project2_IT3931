@@ -18,7 +18,7 @@ def sniff_packets(interface):
                 src_port, dest_port, data = tcp_segment(data)
                 if len(data) > 0:
                     print(f"TCP Packet from {src_port} to {dest_port}:")
-                    print(data)
+                    print(data.decode('utf-8'))
 
 def ethernet_frame(data):
     eth_header = struct.unpack('!6s6sH', data[:14])
@@ -33,7 +33,7 @@ def ipv4_packet(data):
     proto = ip_header[6]
     src = socket.inet_ntoa(ip_header[8])
     dest = socket.inet_ntoa(ip_header[9])
-    return proto, data[header_length:]
+    return proto, data[20:]
 
 def tcp_segment(data):
     tcp_header = struct.unpack('!HHLLBBHHH', data[:20])
@@ -43,5 +43,5 @@ def tcp_segment(data):
     return src_port, dest_port, data[data_offset:]
 
 if __name__ == "__main__":
-    INTERFACE = "eth0"  # Change this to your network interface
+    INTERFACE = "enp0s8"  # Change this to your network interface
     sniff_packets(INTERFACE)
