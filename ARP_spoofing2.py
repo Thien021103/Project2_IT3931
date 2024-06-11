@@ -300,7 +300,7 @@ class NetworkScanGUI:
             if Raw in packet:
                 # Extract the TCP payload (Raw layer)
                 tcp_payload = bytes(packet[Raw].load)
-                
+                print(tcp_payload)
                 # Decode the payload as UTF-8
                 try:
                     decoded_payload = tcp_payload.decode('utf-8')
