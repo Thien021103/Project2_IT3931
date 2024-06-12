@@ -299,33 +299,6 @@ class NetworkScanGUI:
         except Exception as e:
             self.log_message(f"Error in sniffing packets: {e}", 'red')
 
-    
-    def is_about_topic(self, text, keywords):
-        # Function to create a regex pattern for a keyword with variations
-        def create_pattern(keyword):
-            keyword = keyword.lower()
-            # Replace specific characters with regex groups to handle accented and unaccented versions
-            keyword = keyword.replace('t', '[tT]')
-            keyword = re.sub(r'[ấa]', '[ấaA]', keyword)
-            keyword = keyword.replace('n', '[nN]')
-            keyword = keyword.replace('c', '[cC]')
-            keyword = re.sub(r'[ôo]', '[ôoO]', keyword)
-            keyword = keyword.replace('g', '[gG]')
-            # Allow spaces or no spaces between characters
-            return r'\s*'.join(list(keyword))
-        
-        # Create regex patterns for each keyword
-        patterns = [create_pattern(keyword) for keyword in keywords]
-        
-        # Combine patterns with OR operator
-        combined_pattern = '|'.join(patterns)
-        
-        # Compile the combined regex pattern
-        regex = re.compile(combined_pattern, re.IGNORECASE)
-        
-        # Search for the pattern in the text
-        return bool(regex.search(text))
-
     @handle_exceptions
     def log_packet(self, packet):
         if packet.haslayer(TCP) and packet.haslayer(IP):
@@ -336,8 +309,7 @@ class NetworkScanGUI:
                         decoded_payload = self.decode_payload(tcp_payload)
                         if decoded_payload:
                             keyword = self.keyword_entry.get().strip()
-                            keywords = ['tấn công', 'tan cong', 'tancong', 'tan  cong', 't a ncong']
-                            if self.is_about_topic(text=decoded_payload, keywords=keywords):
+                            if keyword in decoded_payload:
                                 self.log_message(f'{packet[IP].src} : {decoded_payload}', 'green')
                     except UnicodeDecodeError as e:
                         self.log_message(f"Failed to decode TCP payload: {e}", 'red')
