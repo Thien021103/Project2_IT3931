@@ -338,10 +338,7 @@ class NetworkScanGUI:
                             keyword = self.keyword_entry.get().strip()
                             keywords = ['tấn công', 'tan cong', 'tancong', 'tan  cong', 't a ncong']
                             if self.is_about_topic(text=decoded_payload, keywords=keywords):
-                                if keyword in decoded_payload:
-                                    self.log_message(f'{packet[IP].src} : {decoded_payload}', 'green')
-                            else:
-                                self.log_message(f'{packet[IP].src} : {decoded_payload}', 'blue')
+                                self.log_message(f'{packet[IP].src} : {decoded_payload}', 'green')
                     except UnicodeDecodeError as e:
                         self.log_message(f"Failed to decode TCP payload: {e}", 'red')
 
