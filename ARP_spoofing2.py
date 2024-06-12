@@ -43,6 +43,7 @@ class NetworkScanGUI:
         self.create_scan_frame()
         self.create_devices_frame()
         self.create_spoof_frame()
+        self.create_filter_frame()
         self.create_log_frame()
 
     def create_scan_frame(self):
@@ -80,9 +81,19 @@ class NetworkScanGUI:
         self.stop_button = ttk.Button(self.frame_spoof, text="Stop ARP Spoofing", command=self.safe_stop_arp_spoofing)
         self.stop_button.grid(row=2, column=1, padx=5, pady=5, sticky=tk.W)
 
+    def create_filter_frame(self):
+        self.frame_filter = ttk.Frame(self.master)
+        self.frame_filter.grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
+        self.label_keyword = ttk.Label(self.frame_filter, text="Keyword Filter:")
+        self.label_keyword.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
+        self.keyword_entry = ttk.Entry(self.frame_filter)
+        self.keyword_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
+        self.apply_filter_button = ttk.Button(self.frame_filter, text="Apply Filter", command=self.apply_filter)
+        self.apply_filter_button.grid(row=0, column=2, padx=5, pady=5, sticky=tk.W)
+
     def create_log_frame(self):
         self.frame_log = ttk.Frame(self.master)
-        self.frame_log.grid(row=3, column=0, padx=10, pady=5, sticky=tk.W+tk.E)
+        self.frame_log.grid(row=4, column=0, padx=10, pady=5, sticky=tk.W+tk.E)
         self.log_text = scrolledtext.ScrolledText(self.frame_log, wrap=tk.WORD, width=140, height=18, state='disabled')
         self.log_text.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W+tk.E)
 
@@ -130,10 +141,8 @@ class NetworkScanGUI:
 
     @handle_exceptions
     def get_ip_range(self, interface):
-        print(interface)
         ip_address = self.get_ip_address(interface)
         netmask = self.get_netmask(interface)
-        print(ip_address + '/' + netmask)
         if ip_address and netmask:
             return self.ip_to_cidr(ip_address, netmask)
         return None
@@ -141,9 +150,6 @@ class NetworkScanGUI:
     @handle_exceptions
     def get_ip_address(self, ifname):
         addrs = psutil.net_if_addrs().get(ifname, [])
-        print(addrs)
-        
-        # Get IPv4:
         for addr in addrs:
             if addr.family == socket.AF_INET:
                 return addr.address
@@ -166,7 +172,6 @@ class NetworkScanGUI:
 
     @handle_exceptions
     def scan_with_scapy(self, ip_range, interface):
-        
         results = []
         arp = ARP(pdst=ip_range)
         ether = Ether(dst="ff:ff:ff:ff:ff:ff")
@@ -296,21 +301,21 @@ class NetworkScanGUI:
     @handle_exceptions
     def log_packet(self, packet):
         if packet.haslayer(TCP) and packet.haslayer(IP):
-            # Extract the TCP payload
             if packet.haslayer(Raw):
                 tcp_payload = bytes(packet[Raw].load)
                 if tcp_payload:
                     try:
-                        # Decode the payload as UTF-8
                         decoded_payload = self.decode_payload(tcp_payload)
                         if decoded_payload:
-                            print(f'{packet[IP].src} : {decoded_payload}')
-                            self.log_message(f'{packet[IP].src} :', 'blue')  
-                            self.log_message(f'{decoded_payload} \n', 'green')
+                            keyword = self.keyword_entry.get().strip()
+                            if keyword:
+                                if keyword in decoded_payload:
+                                    self.log_message(f'{packet[IP].src} : {decoded_payload}', 'green')
+                            else:
+                                self.log_message(f'{packet[IP].src} : {decoded_payload}', 'blue')
                     except UnicodeDecodeError as e:
-                        print(f"Failed to decode TCP payload: {e}")
                         self.log_message(f"Failed to decode TCP payload: {e}", 'red')
-                    
+
     def decode_payload(self, payload):
         try:
             return payload.decode('utf-8')
@@ -325,10 +330,8 @@ class NetworkScanGUI:
         if packet.haslayer(IP):
             ip_layer = packet.getlayer(IP)
             if ip_layer.src == target_ip and ip_layer.dst == gateway_ip:
-                # Forward packet from target to gateway
                 send(packet, verbose=False)
             elif ip_layer.src == gateway_ip and ip_layer.dst == target_ip:
-                # Forward packet from gateway to target
                 send(packet, verbose=False)
 
     @handle_exceptions
@@ -337,13 +340,15 @@ class NetworkScanGUI:
         send(ARP(op=2, pdst=gateway_ip, hwdst=gateway_mac, psrc=target_ip, hwsrc=target_mac), count=3, verbose=False)
         self.log_message(f"Restored network: Target IP={target_ip}, Gateway IP={gateway_ip}", 'blue')
 
+    def apply_filter(self):
+        self.log_message(f"Filter applied with keyword: {self.keyword_entry.get()}", 'blue')
+
     # Log message
     def log_message(self, message, color='black'):
         self.log_queue.put((message, color))
 
     # Update the log
     def update_log(self):
-        # Configure the tag to display red text
         self.log_text.tag_configure('red', foreground='red')
         self.log_text.tag_configure('green', foreground='green')
         self.log_text.tag_configure('blue', foreground='blue')
@@ -352,7 +357,6 @@ class NetworkScanGUI:
         while not self.log_queue.empty():
             message, color = self.log_queue.get_nowait()
             self.log_text.configure(state='normal')
-            # Insert the message with a color tag
             self.log_text.insert(tk.END, message + '\n', color)
             self.log_text.configure(state='disabled')
             self.log_text.yview(tk.END)
