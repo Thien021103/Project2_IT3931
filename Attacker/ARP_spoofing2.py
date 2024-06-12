@@ -300,7 +300,7 @@ class NetworkScanGUI:
             self.log_message(f"Error in sniffing packets: {e}", 'red')
 
     
-    def is_about_topic(text, keywords):
+    def is_about_topic(self, text, keywords):
         # Function to create a regex pattern for a keyword with variations
         def create_pattern(keyword):
             keyword = keyword.lower()
